@@ -1,0 +1,5 @@
+struct timestamped_vector_double {
+    int64_t ts;
+    int32_t len;
+    double values[len];
+}

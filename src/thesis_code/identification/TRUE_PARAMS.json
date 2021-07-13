@@ -1,0 +1,69 @@
+{
+    "carousel_speed": -2.0,
+    "carousel_tau": 1.0,
+    "g": 9.81,
+    "rho": 1.22,
+    "m": 1.22,
+    "I_COM": [
+        [
+            1.0,
+            0.0,
+            0.0
+        ],
+        [
+            0.0,
+            1.0,
+            0.0
+        ],
+        [
+            0.0,
+            0.0,
+            1.0
+        ]
+    ],
+    "pos_center_of_mass_wrt_4": [
+        0.03,
+        0.0,
+        0.0
+    ],
+    "pos_aileron_aerodynamic_center_wrt_4": [
+        0.0,
+        0.5,
+        0.0
+    ],
+    "pos_elevator_aerodynamic_center_wrt_4": [
+        -0.56,
+        0.0,
+        -0.1
+    ],
+    "pos_imu_wrt_4": [
+        0.1,
+        0,
+        0
+    ],
+    "pos_4_wrt_3": [
+        0.0,
+        0.5,
+        0.0
+    ],
+    "pos_3_wrt_2": [
+        0.0,
+        2.05,
+        0.0
+    ],
+    "S_A": 0.2,
+    "S_E": 0.03,
+    "C_LA_0": 0.2,
+    "C_LA_max": 3.0,
+    "C_DA_max": 3.0,
+    "LiftToDragRatio_A": 100,
+    "C_LE_0": 0.0,
+    "C_LE_max": 3.0,
+    "C_DE_max": 3.0,
+    "C_LE_delta": 0.1,
+    "LiftToDragRatio_E": 100,
+    "elevator_deflector_gain": 1.0,
+    "elevator_deflector_tau": 0.2,
+    "mu_phi": 0.01,
+    "mu_theta": 0.8
+}

@@ -1,0 +1,55 @@
+{
+    "m": 1.4,
+    "Ixx_COM": 2.5,
+    "Iyy_COM": 0.3,
+    "Izz_COM": 1.0,
+    "pos_center_of_mass_wrt_4": [
+        0.03,
+        0.0,
+        0.0
+    ],
+    "pos_aileron_aerodynamic_center_wrt_4": [
+        0.0,
+        0.5,
+        0.0
+    ],
+    "pos_elevator_aerodynamic_center_wrt_4": [
+        -0.56,
+        0.0,
+        -0.1
+    ],
+    "pos_imu_wrt_4": [
+        0.15,
+        0.0,
+        -0.05
+    ],
+    "rot_imu_wrt_4": [
+	0.0,
+	3.141592653589793,
+	0.0
+    ],
+    "pos_4_wrt_3": [
+        0.0,
+        0.5,
+        0.0
+    ],
+    "pos_3_wrt_2": [
+        0.0,
+        2.05,
+        0.0
+    ],
+    "S_A": 0.2,
+    "S_E": 0.08,
+    "C_LA_0": 2.5,
+    "C_LA_max": 3.75,
+    "C_DA_0": 0.25,
+    "C_DA_max": 0.375,
+    "C_LE_0": 0.3,
+    "C_LE_max": 0.75,
+    "C_DE_0": 0.03,
+    "C_DE_max": 0.075,
+    "elevator_deflector_gain": -0.2617993877991494,
+    "elevator_deflector_tau": 0.2,
+    "mu_phi": 0.01,
+    "mu_theta": 0.15
+}
