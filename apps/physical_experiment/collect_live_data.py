@@ -10,16 +10,16 @@ from apps.identification_imu.carousel_identification import Dataset
 today = datetime.datetime.now().strftime("%Y_%m_%d")
 
 # Parse arguments:
-parser = argparse.ArgumentParser(description='Data collection script for physical experiments')
+parser = argparse.ArgumentParser(description='Data collection script for physical_experiment experiments')
 parser.add_argument(
     "-t", "--time",
     dest='capture_time', default='1',
     help="The total capture time"
 )
 parser.add_argument(
-    '-v', '--virtual',
+    '-v', '--virtual_experiment',
     dest='is_virtual_experiment', default='True',
-    help="Flag if this is a virtual experiment. If yes, the output file"
+    help="Flag if this is a virtual_experiment experiment. If yes, the output file"
          " gets a \"VIRTUAL\" prefix, otherwise \"PHYSICAL\"."
 )
 args = parser.parse_args()

@@ -18,7 +18,7 @@ today = datetime.datetime.now().strftime("%Y_%m_%d")
 
 # Parse arguments:
 parser = argparse.ArgumentParser(description='ZCM_collect_idle_data')
-parser.add_argument('-v', '--virtual', dest='is_virtual', default='true', help="Flag if this is a virtual experiment")
+parser.add_argument('-v', '--virtual_experiment', dest='is_virtual', default='true', help="Flag if this is a virtual_experiment experiment")
 parser.add_argument('-d', '--date', dest='date', default=today, help="Date of the dataset formatted as YEAR_MONTH_DAY")
 args = parser.parse_args()
 

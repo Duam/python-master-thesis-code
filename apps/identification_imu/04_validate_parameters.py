@@ -18,9 +18,9 @@ parser.add_argument(
   help="Prefix of the data set (local path and everything up to the underscore after the date)"
 )
 parser.add_argument(
-  '-v', '--virtual',
+  '-v', '--virtual_experiment',
   dest='is_virtual_experiment', default='True',
-  help="Flag if this is a virtual experiment"
+  help="Flag if this is a virtual_experiment experiment"
 )
 
 

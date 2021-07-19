@@ -23,9 +23,9 @@ parser.add_argument(
   help="Actuation signal type. May be \"SS\", \"RECT\", or \"SINE\""
 )
 parser.add_argument(
-  '-v', '--virtual',
+  '-v', '--virtual_experiment',
   dest='is_virtual_experiment', default='True',
-  help="Flag if this is a virtual experiment. If yes, the output file"
+  help="Flag if this is a virtual_experiment experiment. If yes, the output file"
         " gets a \"VIRTUAL\" prefix, otherwise \"PHYSICAL\"."
 )
 
