@@ -39,7 +39,7 @@ class carousel_zcm_constants:
     """get_file_prefix Returns the prefix of the data file
     Args:
       virtual[bool] -- Flag: Virtual (simulated) or physical (real) experiment?
-      identification[bool] -- Flag: Identification dataset or validation dataset?
+      identification_imu[bool] -- Flag: Identification dataset or validation dataset?
       live_data[bool] -- Flag: Data from a turning or an idling experiment?
       pipeline_step[int] -- Which step in the pipeline does this data come from/head to?
     Returns:

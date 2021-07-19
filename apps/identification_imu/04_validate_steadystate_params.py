@@ -248,7 +248,7 @@ if True:
     data_iden['Ys'] = data_iden['Ys']#.head(N_valid)
 
     filename_out = "result_ident_" + key + ".pdf"
-    with PdfPages("../../tex/thesis/figures/identification/" + filename_out) as pdf:
+    with PdfPages("../../tex/thesis/figures/identification_imu/" + filename_out) as pdf:
 
       # Create a shared x-axis
       tAxis = dt * np.arange(N_valid)

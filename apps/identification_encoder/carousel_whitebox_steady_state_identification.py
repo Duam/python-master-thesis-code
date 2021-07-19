@@ -147,9 +147,9 @@ for k in range(p_sym.rows()):
 #quit(0)
 """ =================================       STEADY STATE IDENTIFICATION       ====================================== """
 print(" -------------------------------------------------------------- ")
-print("Doing steady state identification..")
+print("Doing steady state identification_imu..")
 
-# Select parameters that will not be subject to identification
+# Select parameters that will not be subject to identification_imu
 # Don't select vector subcomponents. Always the whole vector/matrix
 idx_fix_parameters = []
 idx_fix_parameters += [0,1,2,3,4] # Carousel speed and time constant, gravity, air density, mass

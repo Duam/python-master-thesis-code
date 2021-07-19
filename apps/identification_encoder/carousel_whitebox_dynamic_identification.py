@@ -220,7 +220,7 @@ for k in range(p_sym.shape[0]):
 
 
 quit(0)
-# Select parameters that will not be subject to identification
+# Select parameters that will not be subject to identification_imu
 # Don't select vector subcomponents. Always the whole vector/matrix
 idx_fix_parameters = []
 idx_fix_parameters += [0,1,2,3] # Carousel speed and time constant, gravity, air density, mass
@@ -246,7 +246,7 @@ ode_aug_fun = cas.Function('ode', [x_sym,z_sym,u_sym,p_var_sym,p_fix_sym], [ode_
 alg_aug_fun = cas.Function('alg', [x_sym,z_sym,u_sym,p_var_sym,p_fix_sym], [alg_fun(x_sym,z_sym,u_sym,p_sym)])
 
 """ ====================================       IDENTIFICATION SETUP       ========================================== """
-print("Preparing identification ocp..")
+print("Preparing identification_imu ocp..")
 # Create collocation integrator
 G = simpleColl({
     'x': x_sym,

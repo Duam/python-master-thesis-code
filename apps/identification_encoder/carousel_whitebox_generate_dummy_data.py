@@ -3,7 +3,7 @@
 """
   Author: Paul Daum
   Date: 2019/06/24
-  Brief: This script creates dummy data for dynamic identification
+  Brief: This script creates dummy data for dynamic identification_imu
 """
 
 """ =========================================       PREPARATION       ============================================= """

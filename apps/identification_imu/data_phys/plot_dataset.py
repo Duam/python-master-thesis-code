@@ -102,7 +102,7 @@ pitch = pitch[:N]
 
 filename = "dataset_" + args.signal_type + ".pdf"
 
-with PdfPages("../../../tex/thesis/figures/identification/" + filename) as pdf:
+with PdfPages("../../../tex/thesis/figures/identification_imu/" + filename) as pdf:
   # Plot data
   print("Plotting dataset..")
   fig, ax = plt.subplots(1,1,figsize=(5,5))

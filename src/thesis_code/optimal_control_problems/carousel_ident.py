@@ -392,7 +392,7 @@ class Carousel_Identificator:
 
 
     def call(self):
-        """call Solves the identification problem and returns the result
+        """call Solves the identification_imu problem and returns the result
         Args:
             verbose[bool] -- Verbosity flag
         Returns:
