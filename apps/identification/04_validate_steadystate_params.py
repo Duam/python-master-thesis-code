@@ -13,7 +13,7 @@ validate_original = False
 
 # Load original parameters
 original_param = {}
-in_original_param_filename = "./params_identified_dynamic_imu.json"
+in_original_param_filename = "params_identified_dynamic_imu.json"
 print("Loading identified parameter set " + in_original_param_filename)
 with open(in_original_param_filename, 'r') as file:
     original_param = json.load(file)

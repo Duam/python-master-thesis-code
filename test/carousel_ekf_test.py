@@ -11,7 +11,7 @@ np.set_printoptions(linewidth=np.inf)
 # Load identified parameters
 import json
 param = {}
-path = "../src/thesis_code/carousel_identification/params_identified_dynamic_imu.json"
+path = "../apps/identification/params_identified_dynamic_imu.json"
 print("Loading identified parameter set " + path)
 with open(path, 'r') as file:
     param = json.load(file)

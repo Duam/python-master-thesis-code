@@ -3,8 +3,8 @@ from thesis_code.utils.bcolors import bcolors
 from zerocm import ZCM
 from thesis_code.zcm_message_definitions.timestamped_vector_float import timestamped_vector_float
 from thesis_code.zcm_message_definitions.timestamped_vector_double import timestamped_vector_double
-from thesis_code.carousel_identification.zcm_constants import carousel_zcm_constants as carzcm
-from thesis_code.carousel_identification.zcm_constants import Dataset
+from apps.identification.carousel_identification import carousel_zcm_constants as carzcm
+from apps.identification.carousel_identification import Dataset
 
 # Today's date as a string
 today = datetime.datetime.now().strftime("%Y_%m_%d")

@@ -11,10 +11,10 @@ import sys
 np.set_printoptions(threshold=sys.maxsize)
 
 # Set paths
-dataset_path = "./data_phys/CAROUSEL_ZCMLOG_2019_09_13_STEADY_STATE_CONTROL.zcmlog.PREPROCESSED.csv"
-param_file_in = "./params_initial.json"
+dataset_path = "data_phys/CAROUSEL_ZCMLOG_2019_09_13_STEADY_STATE_CONTROL.zcmlog.PREPROCESSED.csv"
+param_file_in = "params_initial.json"
 param_file_out = "./params_identified_ss_new.json"
-param_vars_file_out = "./params_identified_ss_variances.json"
+param_vars_file_out = "params_identified_ss_variances.json"
 
 """ ================================================================================================================ """
 # Check if input params exist. If not, create them

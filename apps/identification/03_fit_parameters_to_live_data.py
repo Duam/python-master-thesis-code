@@ -11,15 +11,15 @@ import time
 fit_imu = True
 
 #dataset_path = "./data_phys/CAROUSEL_ZCMLOG_2019_09_13_STEADY_STATE_CONTROL.zcmlog.PREPROCESSED.csv"
-dataset_path = "./data_phys/CAROUSEL_ZCMLOG_2019_09_13_RECT_CONTROL.zcmlog.PREPROCESSED.csv"
+dataset_path = "data_phys/CAROUSEL_ZCMLOG_2019_09_13_RECT_CONTROL.zcmlog.PREPROCESSED.csv"
 
 
-param_file_in = "./params_identified_ss.json"
+param_file_in = "params_identified_ss.json"
 #param_file_in = "./params_identified_ss_new.json"
-param_variances_file_in = "./params_identified_ss_variances.json"
+param_variances_file_in = "params_identified_ss_variances.json"
 #param_file_in = "./params_identified_dynamic_imu.json"
 param_file_out = "./params_identified_dynamic_imu_new.json"
-param_vars_file_out = "./params_identified_dynamic_imu_variances.json"
+param_vars_file_out = "params_identified_dynamic_imu_variances.json"
 
 
 """
