@@ -1,4 +1,4 @@
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 import casadi as cas
 from casadi import Function, jacobian, DM, MX, mtimes
 from scipy import linalg

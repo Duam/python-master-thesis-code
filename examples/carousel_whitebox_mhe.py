@@ -10,14 +10,14 @@
 """
 
 import casadi as cas
-from thesis_code.models.carousel_whitebox import get_steady_state
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import get_steady_state
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 import thesis_code.models.carousel_whitebox_viz as cplot
 import numpy as np
 np.set_printoptions(linewidth=np.inf)
 import matplotlib.pyplot as plt
 import pprint
-from thesis_code.utils.signals import rectangle, from_fourier
+from thesis_code.utils.signals import rectangle
 
 """ =========================================       MODEL SETUP       ============================================= """
 

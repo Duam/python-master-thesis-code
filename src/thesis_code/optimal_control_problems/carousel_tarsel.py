@@ -1,4 +1,4 @@
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 import casadi as cas
 from casadi import Function, jacobian, MX, DM, mtimes, vertcat
 from thesis_code.utils.CollocationHelper import simpleColl

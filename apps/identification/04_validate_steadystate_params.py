@@ -1,4 +1,4 @@
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 from thesis_code.carousel_simulator import Carousel_Simulator
 import matplotlib.pyplot as plt
 import json

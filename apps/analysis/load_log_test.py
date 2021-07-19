@@ -2,7 +2,7 @@ from zerocm import LogFile
 import matplotlib.pyplot as plt
 import pandas as pd
 pd.plotting.register_matplotlib_converters()
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 
 # Fetch params
 model_params = CarouselWhiteBoxModel.getDefaultParams()

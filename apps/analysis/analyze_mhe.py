@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sb
 pd.plotting.register_matplotlib_converters()
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 import thesis_code.utils.data_processing_tools as proc
 
 do_plot_timeseries = False

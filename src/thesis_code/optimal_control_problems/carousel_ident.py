@@ -1,4 +1,4 @@
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 import casadi as cas
 import numpy as np
 from casadi import Function, DM, mtimes, vertcat, horzcat

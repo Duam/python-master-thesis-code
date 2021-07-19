@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 import thesis_code.utils.data_processing_tools as proc
 import matplotlib
 from matplotlib.backends.backend_pgf import FigureCanvasPgf

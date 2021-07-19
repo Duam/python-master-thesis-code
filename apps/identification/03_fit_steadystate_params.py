@@ -1,4 +1,4 @@
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 from thesis_code.utils.ParametricNLP import ParametricNLP
 import pprint, json
 from thesis_code.utils.bcolors import bcolors

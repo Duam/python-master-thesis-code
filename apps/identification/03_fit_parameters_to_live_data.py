@@ -1,4 +1,4 @@
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 from thesis_code.components.carousel_ident import Carousel_Identificator
 import json
 from copy import deepcopy

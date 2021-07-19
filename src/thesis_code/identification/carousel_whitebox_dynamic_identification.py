@@ -11,7 +11,7 @@
 import csv
 import casadi as cas
 from casadi import vertcat, symvar
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 from thesis_code.utils.CollocationHelper import simpleColl
 from scipy.interpolate import CubicSpline
 import numpy as np

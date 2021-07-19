@@ -1,4 +1,4 @@
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 from thesis_code.components.carousel_ekf import Carousel_EKF
 import casadi as cas
 from casadi import Function, jacobian, DM, MX, mtimes, horzcat, vertcat

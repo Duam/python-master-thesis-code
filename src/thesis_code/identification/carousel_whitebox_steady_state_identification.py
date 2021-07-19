@@ -13,20 +13,16 @@
 import casadi as cas
 from casadi import vertcat, symvar, mtimes
 # For the model
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 # For math
 import numpy as np
 np.set_printoptions(linewidth=np.inf)
 # For plotting
-import matplotlib.pyplot as plt
 # For colorful text
-from thesis_code.utils.bcolors import bcolors
 # For deepcopy
-import copy
 # For nice dictionary prints
 import pprint
 # For signal generation
-from thesis_code.utils.signals import rectangle, from_fourier
 # For everything else
 from thesis_code.utils.ParametricNLP import ParametricNLP
 

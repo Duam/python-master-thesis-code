@@ -3,7 +3,7 @@ import numpy as np
 from thesis_code.utils.bcolors import bcolors
 import pprint
 import matplotlib.pyplot as plt
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel, cross_product
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 import thesis_code.utils.signals as signals
 
 np.set_printoptions(linewidth=np.inf)

@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.random import multivariate_normal
 from casadi import MX, DM, vertcat, integrator, Function
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 
 class Carousel_Simulator:
   def __init__(self, model:CarouselWhiteBoxModel, 

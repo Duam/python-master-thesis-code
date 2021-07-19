@@ -8,7 +8,7 @@ from thesis_code.zcm_message_definitions.timestamped_vector_float import timesta
 from thesis_code.zcm_message_definitions.timestamped_vector_double import timestamped_vector_double
 from thesis_code.utils.zcm_constants import carousel_zcm_constants as carzcm
 import thesis_code.utils.signals as signals
-from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
+from thesis_code.carousel_model import CarouselWhiteBoxModel
 from thesis_code.components.carousel_mhe import Carousel_MHE
 from thesis_code.components.carousel_mpc import Carousel_MPC
 from thesis_code.components.carousel_tarsel import Carousel_TargetSelector
