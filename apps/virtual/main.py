@@ -6,7 +6,7 @@ import thesis_code.models.carousel_whitebox_viz as viz
 from thesis_code.components.carousel_mhe import Carousel_MHE
 from thesis_code.components.carousel_mpc import Carousel_MPC
 from thesis_code.components.carousel_tarsel import Carousel_TargetSelector
-from thesis_code.carousel_simulator.carousel_simulator import Carousel_Simulator
+from thesis_code.carousel_simulator import Carousel_Simulator
 from thesis_code.utils.bcolors import bcolors
 
 """ =========================== Simulation ============================= """

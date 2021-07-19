@@ -1,6 +1,6 @@
 import numpy as np
 from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
-from thesis_code.carousel_simulator.carousel_simulator import Carousel_Simulator
+from thesis_code.carousel_simulator import Carousel_Simulator
 from thesis_code.models.carousel_whitebox_viz import *
 
 np.set_printoptions(linewidth=np.inf)

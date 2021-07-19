@@ -2,7 +2,7 @@ import numpy as np
 import casadi as cas
 from thesis_code.models.carousel_whitebox import CarouselWhiteBoxModel
 from thesis_code.components.carousel_tarsel import Carousel_TargetSelector
-from thesis_code.carousel_simulator.carousel_simulator import Carousel_Simulator
+from thesis_code.carousel_simulator import Carousel_Simulator
 import thesis_code.models.carousel_whitebox_viz as viz
 import thesis_code.utils.signals as signals
 from matplotlib.backends.backend_pdf import PdfPages
