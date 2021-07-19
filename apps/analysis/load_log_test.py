@@ -18,21 +18,21 @@ case = 'mhe'
 
 # Open and load logfile
 if case == 'idle':
-  filename = './data/zcmlog-2019-09-18-idle-data-for-variance-analysis.0001'
-  filename = './data/zcmlog-2019-09-20-idle-data-for-variance-analysis-MAF50.0000'
+  filename = 'data/zcmlog-2019-09-18-idle-data-for-variance-analysis.0001'
+  filename = 'data/zcmlog-2019-09-20-idle-data-for-variance-analysis-MAF50.0000'
   channels = ['VE2_KIN4_SET', 
               'VE1_SCAPULA_ELEVATION', 'VE1_SCAPULA_ROTATION', 'VE1_MPU_ACC', 'VE1_MPU_GYRO',
               'VE2_MPU_ACC', 'VE2_MPU_GYRO', 'MEASUREMENTS_sampled']
 elif case == 'mhe':
   #filename = './data/zcmlog-2019-09-18-mhe-test-with-measured-angles.0000'
-  filename = './data/zcmlog-2019-09-19-mhe-test-with-gyro.0000'
-  filename = './data/zcmlog-2019-09-19-mhe-test-with-gyro.0003'
-  filename = './data/zcmlog-2019-09-19-mhe-test-with-accelerometer.0000'
-  filename = './data/zcmlog-2019-09-19-mhe-test-with-acc-and-gyro.0004'
+  filename = 'data/zcmlog-2019-09-19-mhe-test-with-gyro.0000'
+  filename = 'data/zcmlog-2019-09-19-mhe-test-with-gyro.0003'
+  filename = 'data/zcmlog-2019-09-19-mhe-test-with-accelerometer.0000'
+  filename = 'data/zcmlog-2019-09-19-mhe-test-with-acc-and-gyro.0004'
   #filename = './data/zcmlog-2019-09-23-mhe-test-with-acc-and-gyro-jit_R1e-3.0017'
-  filename = './data/zcmlog-2019-09-29_ss_playback_mhe_imu.0002'
+  filename = 'data/zcmlog-2019-09-29_ss_playback_mhe_imu.0002'
   #filename = './data/zcmlog-2019-09-29_rect_playback_mhe_imu.0002'
-  filename = './data/zcmlog-2019-09-29_sine_playback_mhe_imu.0002'
+  filename = 'data/zcmlog-2019-09-29_sine_playback_mhe_imu.0002'
   channels = ['VE2_KIN4_SET', 'VE1_SCAPULA_ELEVATION', 'VE1_SCAPULA_ROTATION', 'state_estimate']
 else:
   filename = "NO_CASE_SPECIFIED"
