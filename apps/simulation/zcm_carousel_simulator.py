@@ -6,7 +6,7 @@ from thesis_code.zcm_message_definitions.timestamped_vector_float import timesta
 from thesis_code.zcm_message_definitions.timestamped_vector_double import timestamped_vector_double
 from thesis_code.utils.zcm_constants import carousel_zcm_constants
 from thesis_code.carousel_model import CarouselWhiteBoxModel
-from carousel_simulator import Carousel_Simulator
+from thesis_code.carousel_simulator import Carousel_Simulator
 
 # Create a simulation model
 param_sim = CarouselWhiteBoxModel.getDefaultParams()

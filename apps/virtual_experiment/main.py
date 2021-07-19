@@ -2,10 +2,10 @@ import numpy as np
 import casadi as cas
 from thesis_code.carousel_model import CarouselWhiteBoxModel
 import matplotlib.pyplot as plt
-import thesis_code.models.carousel_whitebox_viz as viz
-from thesis_code.components.carousel_mhe import Carousel_MHE
-from thesis_code.components.carousel_mpc import Carousel_MPC
-from thesis_code.components.carousel_tarsel import Carousel_TargetSelector
+import thesis_code.carousel_visualizer as viz
+from thesis_code.optimal_control_problems.carousel_mhe import Carousel_MHE
+from thesis_code.optimal_control_problems.carousel_mpc import Carousel_MPC
+from thesis_code.optimal_control_problems.carousel_tarsel import Carousel_TargetSelector
 from thesis_code.carousel_simulator import Carousel_Simulator
 from thesis_code.utils.bcolors import bcolors
 
