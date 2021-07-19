@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 from thesis_code.models.overhead_crane import OverheadCrane
-from thesis_code.integrators.rk4step import rk4step
+from thesis_code.rk4step import rk4step
 from thesis_code.referenceGenerators.RefGenNLP import RefGenNLP
 from thesis_code.controllers.LMPC_simple import LMPC
 

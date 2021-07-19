@@ -1,6 +1,6 @@
 import casadi as cas
 import numpy as np
-from thesis_code.integrators.rk4step import rk4step
+from thesis_code.rk4step import rk4step
 from thesis_code.models.overhead_crane import OverheadCrane
 
 # Create a model

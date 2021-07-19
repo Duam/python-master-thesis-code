@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from thesis_code.models.overhead_crane import OverheadCrane
 from thesis_code.models.overhead_crane_viz import OverheadCrane_Visualizer
-from thesis_code.integrators.rk4step import rk4step
+from thesis_code.rk4step import rk4step
 
 print("This script tests the overhead-crane model and its visualizer")
 
