@@ -1,0 +1,5 @@
+struct timestamped_vector_float {
+    int64_t ts;
+    int32_t len;
+    float values[len];
+}
