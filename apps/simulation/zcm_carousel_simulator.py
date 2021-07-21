@@ -26,38 +26,49 @@ w_covar_sim =  0e0 * np.eye(model_sim.NX())
 # Create a simulator
 u = u_ss_sim
 simulator = CarouselSimulator(
-  model_sim, x0 = x_ss_sim, z0 = z_ss_sim,
-  process_noise_mean = w_mean_sim,
-  process_noise_covar = w_covar_sim,
-  measurement_noise_mean = v_mean_sim,
-  measurement_noise_covar = v_covar_sim,
-  jit=True
+    model_sim, x0 = x_ss_sim, z0 = z_ss_sim,
+    process_noise_mean = w_mean_sim,
+    process_noise_covar = w_covar_sim,
+    measurement_noise_mean = v_mean_sim,
+    measurement_noise_covar = v_covar_sim,
+    jit=True
 )
 
 print("x0 = " + str(x_ss_sim))
 print("z0 = " + str(z_ss_sim))
 print("u0 = " + str(u_ss_sim))
 
-# Define a control callback
-def onNewControl(channel,message):
-  global u
-  print("Received " + str(message.values) + " on channel " + channel)
-  u = message.values
 
-# Initialize ZCM 
+def onNewControl(channel, message) -> None:
+    """Callback that executes when a new control message arrives
+    :param channel: The zcm channel to listen to
+    :param message: The message arriving
+    :returns: None
+    """
+    global u
+    print("Received " + str(message.values) + " on channel " + channel)
+    u = message.values
+
+
 zcm = ZCM(carousel_zcm_constants.url)
-if(not zcm.good()):
-  raise Exception("ZCM not good")
+if not zcm.good():
+    raise Exception("ZCM not good")
 
 # Subscribe to the channels
 zcm.subscribe(carousel_zcm_constants.control_elevator_channel, timestamped_vector_float, onNewControl)
 
-# Create SIGINT handler for quick stop
-def signal_handler(sig, frame):
-  print('Ctrl+C: Exiting.')
-  zcm.stop()
-  quit(0)
-  
+
+def signal_handler(sig, frame) -> None:
+    """Create SIGINT handler for quick stop
+    :param sig: The signal that triggers the handler
+    :param frame: ?
+    :returns: None
+    """
+    print('Ctrl+C: Exiting.')
+    zcm.stop()
+    quit(0)
+
+
 # Register signal
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -92,70 +103,70 @@ lastTime = startTime
 print("Start.")
 while True:
 
-  """ === Simulation === """
+    """ === Simulation === """
 
-  # Simulate one step
-  xf_k, zf_k, y0_k = simulator.simulate_timestep(u[0], dt)
-  yaw = xf_k[2].full()
+    # Simulate one step
+    xf_k, zf_k, y0_k = simulator.simulate_timestep(u[0], dt)
+    yaw = xf_k[2].full()
 
 
-  # Extract measurements
-  y0_k = y0_k.full()
-  #y_angular_velocity = y0_k[0:3]
-  #y_linear_acceleration = y0_k[3:6]
-  y_yaw = np.mod(yaw, 93*2*np.pi)  
-  y_roll = y0_k[0]
-  y_pitch = y0_k[1]
+    # Extract measurements
+    y0_k = y0_k.full()
+    #y_angular_velocity = y0_k[0:3]
+    #y_linear_acceleration = y0_k[3:6]
+    y_yaw = np.mod(yaw, 93*2*np.pi)
+    y_roll = y0_k[0]
+    y_pitch = y0_k[1]
 
-  """ === Publishing === """
-  nowTime = time.time()
-  timestamp = int(nowTime*1e9)
+    """ === Publishing === """
+    nowTime = time.time()
+    timestamp = int(nowTime*1e9)
 
-  # Publish true roll
-  roll_msg.ts = timestamp
-  roll_msg.values = y_roll
-  zcm.publish(carousel_zcm_constants.out_roll_channel, roll_msg)
+    # Publish true roll
+    roll_msg.ts = timestamp
+    roll_msg.values = y_roll
+    zcm.publish(carousel_zcm_constants.out_roll_channel, roll_msg)
 
-  # Publish true pitch
-  pitch_msg.ts = timestamp
-  pitch_msg.values = y_pitch
-  zcm.publish(carousel_zcm_constants.out_pitch_channel, pitch_msg)
+    # Publish true pitch
+    pitch_msg.ts = timestamp
+    pitch_msg.values = y_pitch
+    zcm.publish(carousel_zcm_constants.out_pitch_channel, pitch_msg)
 
-  # Publish true yaw
-  yaw_msg.ts = timestamp
-  yaw_msg.values = y_yaw
-  zcm.publish(carousel_zcm_constants.out_yaw_channel, yaw_msg)
+    # Publish true yaw
+    yaw_msg.ts = timestamp
+    yaw_msg.values = y_yaw
+    zcm.publish(carousel_zcm_constants.out_yaw_channel, yaw_msg)
 
-  # Publish BNO acceleration
-  """
-  acc_msg.ts = timestamp
-  acc_msg.values = y_linear_acceleration
-  zcm.publish(carousel_zcm_constants.out_acc_channel, acc_msg)
-  # Publish BNO angular velocity
-  gyr_msg.ts = timestamp
-  gyr_msg.values = y_angular_velocity
-  zcm.publish(carousel_zcm_constants.out_gyr_channel, gyr_msg)
-  """
-  # Publish internal state
-  state_msg.ts = timestamp
-  state_msg.values = xf_k.full()
-  zcm.publish("CAR_SIM_STATE", state_msg)
+    # Publish BNO acceleration
+    """
+    acc_msg.ts = timestamp
+    acc_msg.values = y_linear_acceleration
+    zcm.publish(carousel_zcm_constants.out_acc_channel, acc_msg)
+    # Publish BNO angular velocity
+    gyr_msg.ts = timestamp
+    gyr_msg.values = y_angular_velocity
+    zcm.publish(carousel_zcm_constants.out_gyr_channel, gyr_msg)
+    """
+    # Publish internal state
+    state_msg.ts = timestamp
+    state_msg.values = xf_k.full()
+    zcm.publish("CAR_SIM_STATE", state_msg)
 
-  """ === Timing === """
+    """ === Timing === """
 
-  # calculate sleep time
-  k = k + 1
-  sleepTime = (startTime - nowTime) + k * dt
+    # calculate sleep time
+    k = k + 1
+    sleepTime = (startTime - nowTime) + k * dt
 
-  # Make sure not to sleep negative time
-  if sleepTime < 0:
-      sleepTime = 0
+    # Make sure not to sleep negative time
+    if sleepTime < 0:
+        sleepTime = 0
 
-  sleepTime_msg = timestamped_vector_double()
-  sleepTime_msg.ts = timestamp
-  sleepTime_msg.len = 1
-  sleepTime_msg.values = [simulator.integrate_step.stats()['t_proc_xnext']]
-  zcm.publish("T_PROC_XNEXT", sleepTime_msg)
+    sleepTime_msg = timestamped_vector_double()
+    sleepTime_msg.ts = timestamp
+    sleepTime_msg.len = 1
+    sleepTime_msg.values = [simulator.integrate_step.stats()['t_proc_xnext']]
+    zcm.publish("T_PROC_XNEXT", sleepTime_msg)
 
-  # sleep
-  time.sleep(sleepTime)
+    # sleep
+    time.sleep(sleepTime)
