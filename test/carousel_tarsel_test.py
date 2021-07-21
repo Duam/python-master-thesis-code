@@ -1,6 +1,6 @@
 import numpy as np
 import casadi as cas
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.components.carousel_tarsel import Carousel_TargetSelector
 from thesis_code.simulator import CarouselSimulator
 import thesis_code.models.carousel_whitebox_viz as viz
@@ -20,7 +20,7 @@ with open(path, 'r') as file:
 
 
 # Create default model
-model = CarouselWhiteBoxModel(param, with_angle_output=True, with_imu_output=True)
+model = CarouselModel(param, with_angle_output=True, with_imu_output=True)
 x0, z0, u0 = model.get_steady_state()
 constants = model.getConstants()
 

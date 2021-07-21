@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.components.carousel_ekf import Carousel_EKF
 import casadi as cas
 from casadi import Function, jacobian, DM, MX, mtimes, horzcat, vertcat
@@ -10,7 +10,7 @@ from thesis_code.utils.ParametricNLP import ParametricNLP
 
 class Carousel_MHE:
 
-    def __init__(self, model: CarouselWhiteBoxModel, N: int, dt: float, verbose:bool=False, do_compile:bool=False, expand=False):
+    def __init__(self, model: CarouselModel, N: int, dt: float, verbose:bool=False, do_compile:bool=False, expand=False):
 
         print("====================================")
         print("===         Creating MHE         ===")

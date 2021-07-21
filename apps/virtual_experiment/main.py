@@ -1,6 +1,6 @@
 import numpy as np
 import casadi as cas
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import matplotlib.pyplot as plt
 import thesis_code.carousel_visualizer as viz
 from thesis_code.carousel_mhe import Carousel_MHE
@@ -11,9 +11,9 @@ from thesis_code.utils.bcolors import bcolors
 
 """ =========================== Simulation ============================= """
 # Create a simulation model
-param_sim = CarouselWhiteBoxModel.getDefaultParams()
+param_sim = CarouselModel.getDefaultParams()
 # TODO: Change some parameters
-model_sim = CarouselWhiteBoxModel(param_sim)
+model_sim = CarouselModel(param_sim)
 
 # Set initial state and noise properties
 x_ss_sim, z_ss_sim, u_ss_sim = model_sim.get_steady_state()
@@ -58,8 +58,8 @@ expand = not jit
 
 """ ===================== Target selection, Estimation and Control ========================== """
 # Create a control/estimation model
-param = CarouselWhiteBoxModel.getDefaultParams()
-model = CarouselWhiteBoxModel(param)
+param = CarouselModel.getDefaultParams()
+model = CarouselModel(param)
 x_ss_est, z_ss_est, u_ss_est = model.get_steady_state()
 
 NX = model.NX()

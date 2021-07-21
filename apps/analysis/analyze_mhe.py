@@ -2,16 +2,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import seaborn as sb
-pd.plotting.register_matplotlib_converters()
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import thesis_code.utils.data_processing_tools as proc
+pd.plotting.register_matplotlib_converters()
 
 do_plot_timeseries = False
 do_plot_errorplot = True
 
 # Fetch params
-model_params = CarouselWhiteBoxModel.getDefaultParams()
-model_constants = CarouselWhiteBoxModel.getConstants()
+model_params = CarouselModel.getDefaultParams()
+model_constants = CarouselModel.getConstants()
 offsets = {
     'VE1_SCAPULA_ELEVATION': model_constants['roll_sensor_offset'],
     'VE1_SCAPULA_ROTATION': model_constants['pitch_sensor_offset']

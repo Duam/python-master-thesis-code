@@ -3,17 +3,17 @@ import numpy as np
 from thesis_code.utils.bcolors import bcolors
 import pprint
 import matplotlib.pyplot as plt
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import thesis_code.utils.signals as signals
 
 np.set_printoptions(linewidth=np.inf)
 
 
 # Parameterize
-params = CarouselWhiteBoxModel.getDefaultParams()
+params = CarouselModel.getDefaultParams()
 
 # Create a carousel model
-model = CarouselWhiteBoxModel(params)
+model = CarouselModel(params)
 
 # Print parameters
 pprint.pprint(model.params)

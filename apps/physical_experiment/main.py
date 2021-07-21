@@ -8,10 +8,10 @@ from thesis_code.zcm_message_definitions.timestamped_vector_float import timesta
 from thesis_code.zcm_message_definitions.timestamped_vector_double import timestamped_vector_double
 from thesis_code.utils.zcm_constants import carousel_zcm_constants as carzcm
 import thesis_code.utils.signals as signals
-from thesis_code.carousel_model import CarouselWhiteBoxModel
-from thesis_code.components.carousel_mhe import Carousel_MHE
-from thesis_code.components.carousel_mpc import Carousel_MPC
-from thesis_code.components.carousel_tarsel import Carousel_TargetSelector
+from thesis_code.model import CarouselModel
+from thesis_code.carousel_mhe import Carousel_MHE
+from thesis_code.carousel_mpc import Carousel_MPC
+from thesis_code.carousel_tarsel import Carousel_TargetSelector
 
 # Set OMP number of threads
 os.environ["OMP_NUM_THREADS"] = str(multiprocessing.cpu_count())
@@ -116,9 +116,9 @@ with open(path, 'r') as file:
 
 # Create the estimation and control model
 if use_direct_angle_measurement:
-    model = CarouselWhiteBoxModel(param, with_angle_output=True, with_imu_output=False)
+    model = CarouselModel(param, with_angle_output=True, with_imu_output=False)
 else:
-    model = CarouselWhiteBoxModel(param, with_angle_output=False, with_imu_output=True)
+    model = CarouselModel(param, with_angle_output=False, with_imu_output=True)
 
 # Fetch sizes and steady state
 NX, NZ, NU, NY, NP = (model.NX(), model.NZ(), model.NU(), model.NY(), model.NP())

@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.components.carousel_ident import Carousel_Identificator
 import json
 from copy import deepcopy
@@ -35,8 +35,8 @@ param = {}
 print("Loading parameter set " + param_file_in)
 with open(param_file_in, 'r') as file:
     param = json.load(file)
-model = CarouselWhiteBoxModel(param, with_angle_output=True, with_imu_output=fit_imu)
-constants = CarouselWhiteBoxModel.getConstants()
+model = CarouselModel(param, with_angle_output=True, with_imu_output=fit_imu)
+constants = CarouselModel.getConstants()
 
 # Get parameter vairances
 param_variances = {}

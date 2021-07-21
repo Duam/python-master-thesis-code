@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import casadi as cas
 from casadi import Function, jacobian, MX, DM, mtimes, vertcat
 from thesis_code.utils.CollocationHelper import simpleColl
@@ -18,7 +18,7 @@ class Carousel_TargetSelector:
         of the carousel's yaw angle. Must be periodic wrt 2*pi
 
     """
-    def __init__(self, model:CarouselWhiteBoxModel, T:float, N:int, reference:Callable[[float],float], verbose:bool=False):
+    def __init__(self, model:CarouselModel, T:float, N:int, reference:Callable[[float], float], verbose:bool=False):
         # Fetch model
         self.model = model
         self.verbose = verbose

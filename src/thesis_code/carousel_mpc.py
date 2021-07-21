@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import casadi as cas
 from casadi import Function, jacobian, DM, mtimes, vertcat
 from thesis_code.utils.CollocationHelper import simpleColl
@@ -7,7 +7,7 @@ from thesis_code.utils.ParametricNLP import ParametricNLP
 
 class Carousel_MPC:
 
-    def __init__(self, model: CarouselWhiteBoxModel, N: int, dt: float, verbose:bool=False, do_compile:bool=False, expand:bool=False):
+    def __init__(self, model: CarouselModel, N: int, dt: float, verbose:bool=False, do_compile:bool=False, expand:bool=False):
         """Carousel_MPC A nonlinear model predictive controller for the carousel whitebox model
 
         Args:

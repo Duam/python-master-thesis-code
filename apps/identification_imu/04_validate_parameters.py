@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.simulator import CarouselSimulator
 import matplotlib.pyplot as plt
 import datetime, argparse, pprint, json
@@ -61,8 +61,8 @@ pprint.pprint(identified_param)
 """ ================================================================================================================ """
 
 # Create models using the original and identified parameters
-original_model = CarouselWhiteBoxModel(original_param)
-identified_model = CarouselWhiteBoxModel(identified_param)
+original_model = CarouselModel(original_param)
+identified_model = CarouselModel(identified_param)
 
 # We simulate for N steps
 N = min([4000, len(data)])

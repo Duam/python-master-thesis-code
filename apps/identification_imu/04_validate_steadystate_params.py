@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.simulator import CarouselSimulator
 import matplotlib.pyplot as plt
 import json
@@ -49,9 +49,9 @@ for name in dataset_names:
 # Create models using the original and identified parameters
 kwargs = {'with_angle_output':False, 'with_imu_output':True}
 
-original_model = CarouselWhiteBoxModel(original_param, *kwargs.values())
-identified_model = CarouselWhiteBoxModel(identified_param, *kwargs.values())
-constants = CarouselWhiteBoxModel.getConstants()
+original_model = CarouselModel(original_param, *kwargs.values())
+identified_model = CarouselModel(identified_param, *kwargs.values())
+constants = CarouselModel.getConstants()
 
 # Simulation data and convenience functions
 dt = 0.05

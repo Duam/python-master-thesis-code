@@ -2,11 +2,11 @@ from zerocm import LogFile
 import matplotlib.pyplot as plt
 import pandas as pd
 pd.plotting.register_matplotlib_converters()
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 
 # Fetch params
-model_params = CarouselWhiteBoxModel.getDefaultParams()
-model_constants = CarouselWhiteBoxModel.getConstants()
+model_params = CarouselModel.getDefaultParams()
+model_constants = CarouselModel.getConstants()
 offsets = {
   'VE1_SCAPULA_ELEVATION': model_constants['roll_sensor_offset'],
   'VE1_SCAPULA_ROTATION': model_constants['pitch_sensor_offset']

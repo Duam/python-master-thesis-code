@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import casadi as cas
 from casadi import Function, jacobian, DM, MX, mtimes
 from scipy import linalg
@@ -6,7 +6,7 @@ from scipy import linalg
 
 class Carousel_EKF:
 
-    def __init__(self, model: CarouselWhiteBoxModel, dt: float, verbose:bool=False, do_compile:bool=False):
+    def __init__(self, model: CarouselModel, dt: float, verbose:bool=False, do_compile:bool=False):
 
         # Fetch
         self.model = model

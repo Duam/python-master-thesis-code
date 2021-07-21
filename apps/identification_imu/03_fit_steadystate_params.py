@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.utils.ParametricNLP import ParametricNLP
 import pprint, json
 from thesis_code.utils.bcolors import bcolors
@@ -21,7 +21,7 @@ param_vars_file_out = "params_identified_ss_variances.json"
 input_file = Path(param_file_in)
 if not input_file.exists():
     print("Warning: " + param_file_in + " does not exist. Creating default params..")
-    CarouselWhiteBoxModel().writeParamsToJson(param_file_in)
+    CarouselModel().writeParamsToJson(param_file_in)
 
 # Create a model
 model_params = {}
@@ -30,7 +30,7 @@ with open(param_file_in, 'r') as file:
     model_params = json.load(file)
 
 print("Creating model..")
-model = CarouselWhiteBoxModel(model_params, with_angle_output=True, with_imu_output=True)
+model = CarouselModel(model_params, with_angle_output=True, with_imu_output=True)
 constants = model.getConstants()
 
 print("===================================================================")

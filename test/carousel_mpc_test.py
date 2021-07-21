@@ -1,6 +1,6 @@
 import numpy as np
 import casadi as cas
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import thesis_code.models.carousel_whitebox_viz as viz
 from thesis_code.simulator import CarouselSimulator
 from thesis_code.components.carousel_mpc import Carousel_MPC
@@ -11,8 +11,8 @@ np.set_printoptions(linewidth=np.inf)
 cas.GlobalOptions.setMaxNumDir(64)
 
 # Create default model
-param = CarouselWhiteBoxModel.getDefaultParams()
-model = CarouselWhiteBoxModel(param)
+param = CarouselModel.getDefaultParams()
+model = CarouselModel(param)
 NX = model.NX() - 2
 NZ = model.NZ()
 NY = model.NY()

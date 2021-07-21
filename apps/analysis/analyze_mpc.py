@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import thesis_code.utils.data_processing_tools as proc
 import matplotlib
 from matplotlib.backends.backend_pgf import FigureCanvasPgf
@@ -10,7 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 pd.plotting.register_matplotlib_converters()
 
 # Fetch params
-model_constants = CarouselWhiteBoxModel.getConstants()
+model_constants = CarouselModel.getConstants()
 offsets = {
     'VE1_SCAPULA_ELEVATION': model_constants['roll_sensor_offset'],
     'VE1_SCAPULA_ROTATION': model_constants['pitch_sensor_offset']

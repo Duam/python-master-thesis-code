@@ -1,12 +1,12 @@
 import numpy as np
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.simulator import CarouselSimulator
 from thesis_code.models.carousel_whitebox_viz import *
 
 np.set_printoptions(linewidth=np.inf)
 
 # Create default model
-model = CarouselWhiteBoxModel()
+model = CarouselModel()
 
 # Set initial state and simulation properties
 x0, z0, u0 = model.get_steady_state()

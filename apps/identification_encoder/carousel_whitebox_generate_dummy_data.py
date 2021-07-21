@@ -12,8 +12,8 @@
 import casadi as cas
 from casadi import vertcat
 # For the model
-from thesis_code.carousel_model import CarouselWhiteBoxModel
-from thesis_code.carousel_model import get_steady_state
+from thesis_code.model import CarouselModel
+from thesis_code.model import get_steady_state
 # For math
 import numpy as np
 np.set_printoptions(linewidth=np.inf)
@@ -32,14 +32,14 @@ print("======================================= GENERATE DUMMY DATA =============
 
 # Get defaul model parameters
 print("Creating model parameters..")
-model_params = CarouselWhiteBoxModel.getDefaultParams()
+model_params = CarouselModel.getDefaultParams()
 model_params['m'] = 1.22
 model_params['C_LA_0'] = 0.2
 model_params['mu_theta'] = 0.8
 
 # Create a carousel model
 print("Creating model..")
-model = CarouselWhiteBoxModel(model_params)
+model = CarouselModel(model_params)
 
 # Print parameters
 print(" ---------------------- Model Parameters ---------------------- ")

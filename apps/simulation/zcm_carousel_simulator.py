@@ -5,14 +5,14 @@ from zerocm import ZCM
 from thesis_code.zcm_message_definitions.timestamped_vector_float import timestamped_vector_float
 from thesis_code.zcm_message_definitions.timestamped_vector_double import timestamped_vector_double
 from thesis_code.utils.zcm_constants import carousel_zcm_constants
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.simulator import CarouselSimulator
 
 # Create a simulation model
-param_sim = CarouselWhiteBoxModel.getDefaultParams()
+param_sim = CarouselModel.getDefaultParams()
 #param_sim['carousel_speed'] = 1e-16 # May not be zero
 # TODO: Change some parameters
-model_sim = CarouselWhiteBoxModel(param_sim)
+model_sim = CarouselModel(param_sim)
 
 # Set initial state and noise properties
 x_ss_sim, z_ss_sim, u_ss_sim = model_sim.get_steady_state() # Fails with speed=0

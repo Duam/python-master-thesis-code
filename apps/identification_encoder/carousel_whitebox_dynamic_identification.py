@@ -11,7 +11,7 @@
 import csv
 import casadi as cas
 from casadi import vertcat, symvar
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 from thesis_code.utils.CollocationHelper import simpleColl
 from scipy.interpolate import CubicSpline
 import numpy as np
@@ -175,11 +175,11 @@ print("Collocation nodes:", Ncol, " (", str(tau_root) + " per interval )")
 
 # Get defaul model parameters
 print("Creating model parameters..")
-model_params = CarouselWhiteBoxModel.getDefaultParams()
+model_params = CarouselModel.getDefaultParams()
 
 # Create a carousel model
 print("Creating model..")
-model = CarouselWhiteBoxModel(model_params)
+model = CarouselModel(model_params)
 
 # Print parameters
 print(" ---------------------- Model Parameters ---------------------- ")

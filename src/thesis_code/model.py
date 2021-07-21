@@ -31,7 +31,7 @@ RotMatZ = Function('RotMatZ', [angle],[
 ])
 
 
-class CarouselWhiteBoxModel:
+class CarouselModel:
 
     @staticmethod
     def get_vector_defined_in_x_viewed_from_y(

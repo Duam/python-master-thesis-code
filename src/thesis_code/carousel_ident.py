@@ -1,4 +1,4 @@
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import casadi as cas
 import numpy as np
 from casadi import Function, DM, mtimes, vertcat, horzcat
@@ -8,7 +8,7 @@ from thesis_code.utils.ParametricNLP import ParametricNLP
 
 class Carousel_Identificator:
 
-    def __init__(self, model:CarouselWhiteBoxModel, N:int, dt:float, verbose:bool=False, do_compile:bool=False, expand:bool=False, fit_imu:bool=False):
+    def __init__(self, model:CarouselModel, N:int, dt:float, verbose:bool=False, do_compile:bool=False, expand:bool=False, fit_imu:bool=False):
         """Carousel_Identificator A module for identifying the carousel's model parameters.
         Args:
             model[CarouselWhiteBoxModel] -- An instance of the carousel's whitebox model

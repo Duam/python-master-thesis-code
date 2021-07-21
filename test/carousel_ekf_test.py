@@ -1,6 +1,6 @@
 import numpy as np
 import casadi as cas
-from thesis_code.carousel_model import CarouselWhiteBoxModel
+from thesis_code.model import CarouselModel
 import thesis_code.models.carousel_whitebox_viz as viz
 from thesis_code.simulator import CarouselSimulator
 from thesis_code.components.carousel_ekf import Carousel_EKF
@@ -17,7 +17,7 @@ with open(path, 'r') as file:
     param = json.load(file)
 
 # Create model
-model = CarouselWhiteBoxModel(param)
+model = CarouselModel(param)
 x0_est,z0_est,u0_est = model.get_steady_state()
 NX = model.NX() - 2
 NU = model.NU() - 1
