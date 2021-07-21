@@ -1,6 +1,6 @@
 import numpy as np
 from thesis_code.carousel_model import CarouselWhiteBoxModel
-from thesis_code.carousel_simulator import Carousel_Simulator
+from thesis_code.simulator import CarouselSimulator
 from thesis_code.models.carousel_whitebox_viz import *
 
 np.set_printoptions(linewidth=np.inf)
@@ -16,7 +16,7 @@ w_mu =  0e0 * np.ones(model.NX())
 Q    = 1e-6 * np.eye(model.NX())
 
 # Create a simulator
-sim = Carousel_Simulator(
+sim = CarouselSimulator(
   model,
   x0,
   z0=z0,
@@ -26,5 +26,5 @@ sim = Carousel_Simulator(
 
 # Simulate a few steps
 for k in range(10):
-  x,z,y = sim.simstep(0.5, 0.1)
+  x,z,y = sim.simulate_timestep(0.5, 0.1)
   print(y)

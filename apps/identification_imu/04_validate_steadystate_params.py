@@ -1,5 +1,5 @@
 from thesis_code.carousel_model import CarouselWhiteBoxModel
-from thesis_code.carousel_simulator import Carousel_Simulator
+from thesis_code.simulator import CarouselSimulator
 import matplotlib.pyplot as plt
 import json
 import pandas as pd
@@ -95,8 +95,8 @@ for name in dataset_names:
   )
 
   # Set up the simulator
-  original_simulator = Carousel_Simulator(model = original_model, x0 = x0)
-  identified_simulator = Carousel_Simulator(model = identified_model, x0 = x0)
+  original_simulator = CarouselSimulator(model = original_model, x0 = x0)
+  identified_simulator = CarouselSimulator(model = identified_model, x0 = x0)
 
   # Simulate using the excitation signal from the validation dataset
   Xs_original_sim = [x0.full()]
@@ -110,7 +110,7 @@ for name in dataset_names:
   for k in range(1,N):
     if validate_original:
       if not original_simulator_crashed:
-        xf_k, zf_k, y0_k = original_simulator.simstep(controls[k], dt)
+        xf_k, zf_k, y0_k = original_simulator.simulate_timestep(controls[k], dt)
         Xs_original_sim += [xf_k.full()]
         Ys_original_sim += [y0_k.full()]
         if cs.mtimes(xf_k.T, xf_k) > max_sq_val:
@@ -118,7 +118,7 @@ for name in dataset_names:
           print("Original model crashed!")
    
     if not identified_simulator_crashed:
-      xf_k, zf_k, y0_k = identified_simulator.simstep(controls[k], dt)
+      xf_k, zf_k, y0_k = identified_simulator.simulate_timestep(controls[k], dt)
       Xs_identified_sim += [xf_k.full()]
       Ys_identified_sim += [y0_k.full()]
       if cs.mtimes(xf_k.T, xf_k) > max_sq_val:

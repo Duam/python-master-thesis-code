@@ -3,10 +3,10 @@ import casadi as cas
 from thesis_code.carousel_model import CarouselWhiteBoxModel
 import matplotlib.pyplot as plt
 import thesis_code.carousel_visualizer as viz
-from thesis_code.optimal_control_problems.carousel_mhe import Carousel_MHE
-from thesis_code.optimal_control_problems.carousel_mpc import Carousel_MPC
-from thesis_code.optimal_control_problems.carousel_tarsel import Carousel_TargetSelector
-from thesis_code.carousel_simulator import Carousel_Simulator
+from thesis_code.carousel_mhe import Carousel_MHE
+from thesis_code.carousel_mpc import Carousel_MPC
+from thesis_code.carousel_tarsel import Carousel_TargetSelector
+from thesis_code.simulator import CarouselSimulator
 from thesis_code.utils.bcolors import bcolors
 
 """ =========================== Simulation ============================= """
@@ -27,7 +27,7 @@ w_covar_sim[2,2] = 1e-12
 w_covar_sim[5,5] = 1e-12
 
 # Create a simulator
-simulator = Carousel_Simulator(
+simulator = CarouselSimulator(
   model_sim, x0 = x_ss_sim, z0 = z_ss_sim,
   process_noise_mean = w_mean_sim,
   process_noise_covar = w_covar_sim,
@@ -192,7 +192,7 @@ for k in range(N_sim):
   print("===============\n")
 
   # Apply the control and simulate
-  xf_k, zf_k, y0_k = simulator.simstep(u0_k[0], dt)
+  xf_k, zf_k, y0_k = simulator.simulate_timestep(u0_k[0], dt)
   Xs_sim += [ xf_k ]
   Zs_sim += [ zf_k ]
   Ys_sim += [ y0_k ]

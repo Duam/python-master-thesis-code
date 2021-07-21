@@ -6,7 +6,7 @@ from thesis_code.zcm_message_definitions.timestamped_vector_float import timesta
 from thesis_code.zcm_message_definitions.timestamped_vector_double import timestamped_vector_double
 from thesis_code.utils.zcm_constants import carousel_zcm_constants
 from thesis_code.carousel_model import CarouselWhiteBoxModel
-from thesis_code.carousel_simulator import Carousel_Simulator
+from thesis_code.simulator import CarouselSimulator
 
 # Create a simulation model
 param_sim = CarouselWhiteBoxModel.getDefaultParams()
@@ -25,7 +25,7 @@ w_covar_sim =  0e0 * np.eye(model_sim.NX())
 
 # Create a simulator
 u = u_ss_sim
-simulator = Carousel_Simulator(
+simulator = CarouselSimulator(
   model_sim, x0 = x_ss_sim, z0 = z_ss_sim,
   process_noise_mean = w_mean_sim,
   process_noise_covar = w_covar_sim,
@@ -95,7 +95,7 @@ while True:
   """ === Simulation === """
 
   # Simulate one step
-  xf_k, zf_k, y0_k = simulator.simstep(u[0], dt)
+  xf_k, zf_k, y0_k = simulator.simulate_timestep(u[0], dt)
   yaw = xf_k[2].full()
 
 

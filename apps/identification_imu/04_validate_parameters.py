@@ -1,5 +1,5 @@
 from thesis_code.carousel_model import CarouselWhiteBoxModel
-from thesis_code.carousel_simulator import Carousel_Simulator
+from thesis_code.simulator import CarouselSimulator
 import matplotlib.pyplot as plt
 import datetime, argparse, pprint, json
 import casadi as cs
@@ -91,17 +91,17 @@ x0 = cs.DM([
 ])
 
 # Set up the simulator
-original_simulator = Carousel_Simulator(model = original_model, x0 = x0)
-identified_simulator = Carousel_Simulator(model = identified_model, x0 = x0)
+original_simulator = CarouselSimulator(model = original_model, x0 = x0)
+identified_simulator = CarouselSimulator(model = identified_model, x0 = x0)
 
 # Simulate using the excitation signal from the validation dataset
 Ys_original_sim = []
 Ys_identified_sim = []
 print("Simulating..")
 for k in range(N):
-    xf_k, zf_k, y0_k = original_simulator.simstep(data['control'][k], dt)
+    xf_k, zf_k, y0_k = original_simulator.simulate_timestep(data['control'][k], dt)
     Ys_original_sim += [y0_k.full()]
-    xf_k, zf_k, y0_k = identified_simulator.simstep(data['control'][k], dt)
+    xf_k, zf_k, y0_k = identified_simulator.simulate_timestep(data['control'][k], dt)
     Ys_identified_sim += [y0_k.full()]
 
 print("Simulation done.")

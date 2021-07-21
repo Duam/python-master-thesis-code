@@ -2,7 +2,7 @@ import numpy as np
 import casadi as cas
 from thesis_code.carousel_model import CarouselWhiteBoxModel
 import thesis_code.models.carousel_whitebox_viz as viz
-from thesis_code.carousel_simulator import Carousel_Simulator
+from thesis_code.simulator import CarouselSimulator
 from thesis_code.components.carousel_mhe import Carousel_MHE
 from thesis_code.components.carousel_tarsel import Carousel_TargetSelector
 import matplotlib.pyplot as plt
@@ -108,7 +108,7 @@ Zs_est = [ z0_est ]
 # Create simulator
 Q_sim = 1e-8 * np.eye((NX+2))
 R_sim = 1e-3 * np.eye((NY))
-simulator = Carousel_Simulator(
+simulator = CarouselSimulator(
   model = model, x0 = Xs_sim[0], z0 = Zs_sim[0],
   process_noise_mean = 0e0 * np.ones((NX+2)),
   process_noise_covar = Q_sim,
@@ -128,7 +128,7 @@ for k in range(N_sim):
   u0_k = Us_sim[k]
 
   # Simulate one step
-  xf_k, zf_k, y0_k = simulator.simstep(u0_k[0], dt_sim)
+  xf_k, zf_k, y0_k = simulator.simulate_timestep(u0_k[0], dt_sim)
   Xs_sim += [ xf_k ]
   Zs_sim += [ zf_k ]
   Ys_sim += [ y0_k ]
