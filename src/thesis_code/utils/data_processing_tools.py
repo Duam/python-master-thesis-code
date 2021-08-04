@@ -38,6 +38,7 @@ def load_log_to_dataframe(filename, channels):
     # Return all the data
     return dataset
 
+
 def smooth_data(dataset, N, channels=None):
     if channels == None:
         channels = dataset.keys()
@@ -54,11 +55,13 @@ def smooth_data(dataset, N, channels=None):
     # Return smoothed data
     return dataset
 
+
 def resample_data(dataset, dt):
     print("Resampling.. dt="+dt)
     for key in dataset.keys():
         dataset[key] = dataset[key].resample(dt,closed='left').first().ffill()
     return dataset
+
 
 def join_and_trim_data(dataset):
     print("Joining data..")
