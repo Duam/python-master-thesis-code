@@ -6,52 +6,50 @@ from thesis_code.utils.CollocationHelper import simpleColl
 from thesis_code.utils.ParametricNLP import ParametricNLP
 
 
-class Carousel_Identificator:
+class CarouselIdentificator:
 
-    def __init__(self, model:CarouselModel, N:int, dt:float, verbose:bool=False, do_compile:bool=False, expand:bool=False, fit_imu:bool=False):
+    def __init__(
+            self,
+            model: CarouselModel,
+            N: int,
+            dt: float,
+            do_compile: bool = False,
+            expand: bool = False,
+            fit_imu: bool = False
+    ):
         """Carousel_Identificator A module for identifying the carousel's model parameters.
         Args:
             model[CarouselWhiteBoxModel] -- An instance of the carousel's whitebox model
             N[int] -- The number of samples
             dt[float] -- The timestep
-            verbose[bool] -- Verbosity flag
             do_compile[bool] -- Compilation flag
             expand[bool] -- Expands the computation graph if set (sometimes solve speedup)
         """
 
-        print("====================================")
-        print("===    Creating Identificator    ===")
-        print("====================================")
-
-        self.verbose = verbose
+        print("Creating idenficator.")
         self.do_compile = do_compile
         self.expand = expand
         self.model = model
         self.initialized = False
 
-        ## Fetch the given parameters as casadi expressions ##
+        # Fetch the given parameters as casadi expressions
         # Input sizes
         NX, NZ, NU, NY, NP = (model.NX(), model.NZ(), model.NU(), model.NY(), model.NP())
         self.NX, self.NZ, self.NU, self.NY, self.NP = [NX, NZ, NU, NY, NP]
         self.N = N
         self.dt = dt
-        
-
-        # The other parameters
-
         print("Parameters fetched.")
 
-        ## Prepare casadi expressions ##
+        # Prepare casadi expressions
         # Get carousel symbolics
         x_sym,z_sym,u_sym,p_sym = (model.x_aug_sym, model.z_sym, model.u_aug_sym, model.p_sym)
         sym_args = [x_sym,z_sym,u_sym,p_sym]
         ode_sym = model.ode_aug_fun(*sym_args)
         alg_sym = model.alg_aug_fun(*sym_args)
         out_sym = model.out_aug_fun(*sym_args)
-
         print("Casadi objects created.")
 
-        ## Create collocation integrator ##
+        # Create collocation integrator
         self.ncol = ncol = 3  # Number of collocation points per interval
         self.Ncol = Ncol = N * ncol  # Total number of collocation points
         tau_root = [0] + cas.collocation_points(ncol, 'radau')
@@ -223,9 +221,9 @@ class Carousel_Identificator:
                 'verbose': True,
                 'expand': self.expand,
                 'jit': False,
-                'ipopt.print_level': 5 if verbose else 0,
-                'print_time': 1 if verbose else 0,
-                'ipopt.print_timing_statistics': 'yes' if verbose else 'no',
+                'ipopt.print_level': 5,
+                'print_time': 1,
+                'ipopt.print_timing_statistics': 'yes',
                 'ipopt.sb': 'yes',
                 'ipopt.max_iter': 100000,
                 'verbose_init': True
@@ -251,10 +249,7 @@ class Carousel_Identificator:
             [jac_g, cas.DM.zeros((m2,m2)) ]    
         ]))
         self.cov_fun = cas.Function('Sigma', [w_ocp_sym, p_ocp_sym], [mat[:n,:n]])
-
-        print("====================================")
-        print("===  Identificator creation done ===")
-        print("====================================")
+        print("Identificator created.")
 
     def simulateModel(self, x: DM, z: DM, u: DM, p: DM, dt: DM):
         """simulateModel Simulates the model for one step
@@ -270,17 +265,25 @@ class Carousel_Identificator:
         step = self.integrator(x0=x, z0=z, p=vertcat(dt, p, u))
         return step['xf'], step['zf']
 
-    def init(self, x0:DM, U:DM, Y:DM, Q:DM, R: DM, S: DM, Q0: DM, verbose:bool=False):
-        """init Initializes the identificator. Has to be called after creation and before call().
-
-        Args:
-            x0[DM] -- Initial state
-            Q[DM] -- Model confidence matrix
-            R[DM] -- Sensor confidence matrix
-            S[DM] -- Parameter's prior guess confidence matrix
-
-        Returns:
-            Nothing
+    def init(
+        self,
+        x0: DM,
+        U: DM,
+        Y: DM,
+        Q: DM,
+        R: DM,
+        S: DM,
+        Q0: DM,
+    ):
+        """Initializes the identificator. Has to be called after creation and before call().
+        :param x0: Initial state.
+        :param U: Control input trajectory.
+        :param Y: Measurement output trajectory.
+        :param Q: Model confidence matrix.
+        :param R: Sensor confidence matrix.
+        :param S: Parameter's prior guess confidence matrix.
+        :param Q0: Initial state confidence matrix.
+        :returns: Nothing.
         """
         print("Initializing Identificator..")
         assert not self.initialized, "Already initialized! Called twice?"
@@ -312,16 +315,14 @@ class Carousel_Identificator:
             vz_k[:self.NZ] = vz_k[-self.NZ:]
             u0_k = U[:, k]
 
-            if verbose:
-                print("Sample " + str(k) + ": u = " + str(u0_k) + ", x = " + str(vx_k[:self.NX]) + ", z = " + str(vz_k[:self.NZ]))
+            print("Sample " + str(k) + ": u = " + str(u0_k) + ", x = " + str(vx_k[:self.NX]) + ", z = " + str(vz_k[:self.NZ]))
 
             # Simulate one collocation interval
             for i in range(self.ncol):
                 dt = self.collocation_dt[i]
                 vx_curr = vx_k[i * self.NX:(i + 1) * self.NX]
                 vz_curr = vz_k[i * self.NZ:(i + 1) * self.NZ]
-                if verbose:
-                    print("Node " + str(i) + ": vx = " + str(vx_curr) + ", vz = " + str(vz_curr))
+                print("Node " + str(i) + ": vx = " + str(vx_curr) + ", vz = " + str(vz_curr))
                 vx_next, vz_next = self.simulateModel(vx_curr, vz_curr, u0_k, P0, dt)
                 vx_k[(i + 1) * self.NX:(i + 2) * self.NX] = vx_next
                 vz_k[(i + 1) * self.NZ:(i + 2) * self.NZ] = vz_next
@@ -390,15 +391,12 @@ class Carousel_Identificator:
         self.initial_guess['P'] = DM(P0)
         self.initialized = True
 
-
     def call(self):
-        """call Solves the identification_imu problem and returns the result
-        Args:
-            verbose[bool] -- Verbosity flag
-        Returns:
-            [P,X,Z,result,stats] -- Parameters, Differential states, Algebraic states, original result, statistics
+        """Solves the identification_imu problem and returns the result
+        :returns: A tuple [P, X, Z, result, stats] with
+            Parameters, Differential states, Algebraic states, original result, statistics
         """
-        if self.verbose: print("Identificator called! ")
+        print("Identificator called! ")
         assert self.initialized
 
         # Optimize!
