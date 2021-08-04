@@ -4,9 +4,21 @@ from casadi import Function, jacobian, DM, MX, mtimes
 from scipy import linalg
 
 
-class Carousel_EKF:
+class CarouselEKF:
 
-    def __init__(self, model: CarouselModel, dt: float, verbose:bool=False, do_compile:bool=False):
+    def __init__(
+            self,
+            model: CarouselModel,
+            dt: float,
+            verbose: bool = False,
+            do_compile: bool = False
+    ):
+        """<TODO>
+        :param model:
+        :param dt:
+        :param verbose:
+        :param do_compile:
+        """
 
         # Fetch
         self.model = model
