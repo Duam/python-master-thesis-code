@@ -4,23 +4,24 @@ import numpy as np
 from thesis_code.model import CarouselModel
 import matplotlib.pyplot as plt
 
+
 def plotStates(
         model: CarouselModel,
         dt: float,
-        Xs_ref: DM=None,
-        Us_ref: DM=None,
-        Xs_sim: DM=None,
-        Us_sim: DM=None,
-        Xs_est: DM=None) -> None:
+        Xs_ref: DM = None,
+        Us_ref: DM = None,
+        Xs_sim: DM = None,
+        Us_sim: DM = None,
+        Xs_est: DM = None
+) -> None:
     """ Plots the states and input as a timeseries
-
     :param model: The carousel model instance
     :param dt: Timestep in seconds
-    :param Xs_ref: State trajectory reference (default None)
-    :param Us_ref: Control trajectory reference (default None)
-    :param Xs_sim: State trajectory actual (default None)
-    :param Us_sim: Control trajectory actual (default None)
-    :param Xs_est: State trajectory estimate (default None)
+    :param Xs_ref: State trajectory reference
+    :param Us_ref: Control trajectory reference
+    :param Xs_sim: State trajectory actual
+    :param Us_sim: Control trajectory actual
+    :param Xs_est: State trajectory estimate
     """
     NX = model.NX()
     if Xs_ref is not None: assert Xs_ref.shape[0] == NX, "Xs_ref shape =" + str(Xs_ref.shape)
@@ -137,9 +138,14 @@ def plotStates(
         plt.grid()
 
 
-def plotStates_withRef(Xs:np.ndarray, Xs_ref:np.ndarray,
-                       Us:np.ndarray, Us_ref:np.ndarray,
-                       dt:float, model:CarouselModel):
+def plotStates_withRef(
+        Xs: np.ndarray,
+        Xs_ref: np.ndarray,
+        Us: np.ndarray,
+        Us_ref: np.ndarray,
+        dt: float,
+        model: CarouselModel
+) -> None:
     """ Plots the states and input as a timeseries
     Args:
       Xs[np.ndarray] -- State trajectory
@@ -224,132 +230,16 @@ def plotStates_withRef(Xs:np.ndarray, Xs_ref:np.ndarray,
         plt.grid()
 
 
-def plotAerodynamics(Xs:np.ndarray, Us:np.ndarray, dt:float, model:CarouselModel):
-    """ Plots the aerodynamics data (AoA, Fl, Fd) as a timeseries
-    Args:
-      Xs[np.ndarray] -- State trajectory
-      Us[np.ndarray] -- Control trajectory
-      dt[float] -- Timestep
-      model[CarouselWhiteBoxModel] -- The used carousel model instance
-    """
-    assert Xs.shape[0] == model.NX()
-    assert Us.shape[0] == model.NU()
-    assert Xs.shape[1] == Us.shape[1] + 1
-    N = Us.shape[1]
-    tAxis = dt * np.arange(N+1)
-
-    p = model.p0()
-    param = model.params
-    print(param)
-
-    # Compute aerodynamics
-    alpha_A = [model.alpha_A(Xs[:,k],p) for k in range(N+1)]
-    FL_A =   [model.FL_A(Xs[:,k],p) for k in range(N+1)]
-    FD_A =   [model.FD_A(Xs[:,k],p) for k in range(N+1)]
-
-    alpha_E = [model.alpha_E(Xs[:,k],p) for k in range(N+1)]
-    FL_E =   [model.FL_E(Xs[:,k],p) for k in range(N+1)]
-    FD_E =   [model.FD_E(Xs[:,k],p) for k in range(N+1)]
-    #AileronData = [model.computeAileronAerodynamicsData(Xs[:,k],param) for k in range(N+1)]
-    #ElevatorData =  [model.computeElevatorAerodynamicsData(Xs[:,k],param) for k in range(N+1)]
-
-
-    #print([data['AoA'] for data in AileronData])
-
-    fig,ax = plt.subplots(3,1)
-    plt.sca(ax[0])
-    plt.plot(tAxis, alpha_A, label="Aileron AoA")
-    plt.plot(tAxis, alpha_E, label="Elevator AoA")
-    plt.legend(loc='best')
-    plt.grid()
-
-    plt.sca(ax[1])
-    plt.ylabel('Lift forces')
-    plt.plot(tAxis, [np.sign(alpha_A[k]) * np.linalg.norm(FL_A[k]) for k in range(N+1)], label="Aileron Lift")
-    plt.plot(tAxis, [np.sign(alpha_E[k]) * np.linalg.norm(FL_E[k]) for k in range(N+1)], label="Elevator Lift")
-    plt.legend(loc='best')
-    plt.grid()
-
-    plt.sca(ax[2])
-    plt.ylabel('Drag forces')
-    plt.plot(tAxis, [np.sign(alpha_A[k]) * np.linalg.norm(FD_A[k]) for k in range(N+1)], label="Aileron Drag")
-    plt.plot(tAxis, [np.sign(alpha_E[k]) * np.linalg.norm(FD_E[k]) for k in range(N+1)], label="Elevator Drag")
-    plt.legend(loc='best')
-    plt.grid()
-
-
-def plotMoments(Xs:np.ndarray, Zs:np.ndarray, Us:np.ndarray, dt:float, model:CarouselModel):
-    """ Plots the mechanical moments as a timeseries
-    Args:
-      Xs[np.ndarray] -- State trajectory
-      Us[np.ndarray] -- Control trajectory
-      dt[float] -- Timestep
-      model[CarouselWhiteBoxModel] -- The used carousel model instance
-    """
-    assert Xs.shape[0] == model.NX()
-    assert Us.shape[0] == model.NU()
-    assert Xs.shape[1] == Us.shape[1] + 1
-    N = Us.shape[1]
-    tAxis = dt * np.arange(N+1)
-
-    p = model.p0()
-
-
-    # Compute all moments in the joint-frame
-    Ms_gravity = np.zeros((3,N+1))
-    Ms_elevator = np.zeros((3,N+1))
-    Ms_aileron  = np.zeros((3,N+1))
-    Ms_pitchdamping = np.zeros((3,N+1))
-    Ms_elevationdamping = np.zeros((3,N+1))
-    Ms_jointconstraint = np.zeros((3,N+1))
-    Ms_total = np.zeros((3,N+1))
-
-    for k in range(N+1):
-        x = Xs[:,k]
-        z = Zs[:,k]
-        Ms_gravity[:,k]          = model.rotateView(x,1,3,model.M_gravity(x,p)).full().flatten()
-        Ms_elevator[:,k]         = model.rotateView(x,1,3,model.M_Elevator(x,p)).full().flatten()
-        Ms_aileron[:,k]          = model.rotateView(x,1,3,model.M_Aileron(x,p)).full().flatten()
-        Ms_pitchdamping[:,k]     = model.rotateView(x,1,3,model.M_PitchDamping(x,p)).full().flatten()
-        Ms_elevationdamping[:,k] = model.rotateView(x,1,3,model.M_ElevationDamping(x,p)).full().flatten()
-        Ms_jointconstraint[:,k]  = model.rotateView(x,1,3,model.M_JointConstraint(x,z,p)).full().flatten()
-        Ms_total[:,k]  = Ms_gravity[:,k]
-        Ms_total[:,k] += Ms_elevator[:,k] + Ms_aileron[:,k]
-        Ms_total[:,k] += Ms_pitchdamping[:,k] + Ms_elevationdamping[:,k]
-        Ms_total[:,k] += Ms_jointconstraint[:,k]
-
-        # Plot all moments component-wise
-    fig,ax = plt.subplots(3,1)
-    plt.suptitle("Mechanical moments in joint frame")
-
-    plot_string = ['x','y','z']
-
-    for k in range(3):
-        plt.sca(ax[k])
-        plt.title(r"$"+plot_string[k]+"$-optimal_control_problems")
-        plt.ylabel(r"$"+plot_string[k]+"$-Moment [Nm]")
-        plt.plot(tAxis, Ms_gravity[k,:], label="Gravity")
-        plt.plot(tAxis, Ms_elevator[k,:], label="Elevator")
-        plt.plot(tAxis, Ms_aileron[k,:], label="Wing")
-        plt.plot(tAxis, Ms_pitchdamping[k,:], label="Pitch damping")
-        plt.plot(tAxis, Ms_elevationdamping[k,:], label="Elevation damping")
-        plt.plot(tAxis, Ms_jointconstraint[k,:], label="Joint constraint")
-        plt.plot(tAxis, Ms_total[k,:], label="Total sum")
-        plt.grid()
-    plt.xlabel(r"Time $t$")
-    leg = plt.legend(loc='best')
-    leg.set_draggable(True)
-
-
-
-""" =========================================       FANCY PLOTS       ============================================= """
-
-
-def plotFlightTrajectory(Xs:np.ndarray, model:CarouselModel, roll_ref:np.ndarray = None):
-    """ Plots the positions and an abstract carousel in 3d
-    Args:
-      Xs[np.ndarray] -- State trajectory
-      model[CarouselWhiteBoxModel] -- The used carousel model instance
+def plotFlightTrajectory(
+        Xs: np.ndarray,
+        model: CarouselModel,
+        roll_ref: np.ndarray = None
+) -> None:
+    """Plots the positions and an abstract carousel in 3d
+    :param Xs: The state trajectory.
+    :param model: The used carousel model instance.
+    :param roll_ref: The roll reference trajectory.
+    :returns: Nothing
     """
     assert Xs.shape[0] == model.NX()
     N = Xs.shape[1] - 1
