@@ -1,38 +1,15 @@
-#!/usr/bin/python3
-
-#########################################
-### @author Paul Daum
-### @date 04.12.2018
-### @brief This file implements a generic
-### optimimization problem
-#########################################
-
-# CasADi is used for algorithmic differentiation
-# and creating the optimization problem
 import casadi as cas
 from casadi import DM, MX, mtimes, vertcat, horzcat, nlpsol, inf, hessian, Function, blockcat
 from casadi import jacobian, hessian
 from casadi import qpsol, is_linear, is_quadratic
 from casadi.tools import struct_symSX, struct_symMX, struct_MX, entry
 from casadi.tools.structure3 import DMStruct
-
-from utils.IterationCallback import IterationCallback
-
 import os
 import numpy
 import scipy
-import copy
 import time
-import itertools
-import multiprocessing
-
 from typing import Callable
 
-###########################################################################
-###                                                                     ###
-###                          START OF OP CLASS                          ###
-###                                                                     ###
-###########################################################################
 
 class ParametricNLP:
 
@@ -80,7 +57,6 @@ class ParametricNLP:
         self.iterCb = None # The iteration-callback function
         self.variables_baked = False
 
-
     def add_decision_var(self, name:str, shape:tuple):
         """ Adds a decision variable to the problem. """
         # Check if baking allowed and if entry already exists
@@ -119,7 +95,6 @@ class ParametricNLP:
         """ Returns the desired parameter. """
         # Return the desired parameter
         return self.struct_p[name]
-
 
     def set_cost(self, expr: MX):
         """ Sets the cost function of the problem.
@@ -234,10 +209,6 @@ class ParametricNLP:
             print("WARNING: In ParametricNLP \"", self.name, "\", element \"", key, "\" is unused.")
         """
 
-        # Create the iteration callback (if given) and add it to the solver
-        if cbfun != None:
-            opts['iteration_callback'] = IterationCallback('IterationCallback', self.nw, self.ng + self.nh, self.np, cbfun)
-
         if 'hess_lag' not in opts.keys():
             # Create lagrange hessian
             w = self.struct_w
@@ -295,7 +266,7 @@ class ParametricNLP:
                 print("Compiling NLP \"" + self.name + "\". This may take a while.")
                 start_time = time.time()
                 self.solver.generate_dependencies(path + ".c")
-                flags  = "gcc "
+                flags = "gcc "
                 flags += " -pipe"
                 flags += " -O3" # use -O3 for maximum evaluation speed # Try out O2, too
                 flags += " -fPIC -shared -v"
