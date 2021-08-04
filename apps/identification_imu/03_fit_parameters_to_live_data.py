@@ -1,5 +1,5 @@
 from thesis_code.model import CarouselModel
-from thesis_code.components.carousel_ident import Carousel_Identificator
+from thesis_code.carousel_ident import CarouselIdentificator
 import json
 from copy import deepcopy
 from thesis_code.utils.bcolors import bcolors
@@ -190,7 +190,7 @@ print(S)
 # Create an identificator
 time_start = time.time()
 print("Time start = " + str(time_start))
-ident = Carousel_Identificator(model, N, dt, verbose=True, do_compile=False, expand=True, fit_imu=fit_imu)
+ident = CarouselIdentificator(model, N, dt, verbose=True, do_compile=False, expand=True, fit_imu=fit_imu)
 time_end = time.time()
 print("Time end = " + str(time_end))
 print("Duration = "+ str(time_end - time_start) + "s")
