@@ -1,11 +1,8 @@
-#!/usr/bin/python3
-
 import casadi as cas
 from thesis_code.utils.ParametricNLP import ParametricNLP
 
 # Create a test optimization problem
 nlp = ParametricNLP(name='test_problem', verbose=True)
-
 
 # Add decision variables and parameters to the problem
 nlp.add_decision_var('x', (3,1))
@@ -41,7 +38,6 @@ opts = {}
 opts['ipopt.print_info_string'] = 'yes'
 opts['ipopt.print_level'] = 3
 opts['ipopt.max_iter'] = 1000
-
 
 # Solve the problem..
 # via ipopt

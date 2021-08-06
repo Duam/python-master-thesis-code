@@ -17,14 +17,14 @@ Q    = 1e-6 * np.eye(model.NX())
 
 # Create a simulator
 sim = CarouselSimulator(
-  model,
-  x0,
-  z0=z0,
-  measurement_noise_covar = R,
-  process_noise_covar = Q
+    model,
+    x0,
+    z0=z0,
+    measurement_noise_covar = R,
+    process_noise_covar = Q
 )
 
 # Simulate a few steps
 for k in range(10):
-  x,z,y = sim.simulate_timestep(0.5, 0.1)
-  print(y)
+    x,z,y = sim.simulate_timestep(0.5, 0.1)
+    print(y)
