@@ -21,15 +21,6 @@ param_variances_file_in = "params_identified_ss_variances.json"
 param_file_out = "./params_identified_dynamic_imu_new.json"
 param_vars_file_out = "params_identified_dynamic_imu_variances.json"
 
-
-"""
-if fit_imu:
-  param_file_in = "./params_identified_dynamic.json"
-  param_file_out = "./params_identified_dynamic_imu.json"
-"""
-
-""" ================================================================================================================ """
-
 # Create a model
 param = {}
 print("Loading parameter set " + param_file_in)
@@ -43,8 +34,6 @@ param_variances = {}
 print("Loading parameter variance set " + param_variances_file_in)
 with open(param_variances_file_in, 'r') as file:
     param_variances = json.load(file)
-
-""" ================================================================================================================ """
 
 # Load data
 print("Loading dataset " + dataset_path)
@@ -78,22 +67,19 @@ pitch = constants['pitch_sensor_offset'] - y_pitch
 
 # Set sampling time (20 Hz)
 dt = 1. / 20.
-#dt = 1. / 2.
 
-# Set initial state
-# Derivatives computed by forward differences
+# Set initial state, derivatives computed by forward differences
 x0 = cs.DM([roll[0], pitch[0], (roll[1]-roll[0])/dt, (pitch[1]-pitch[0])/dt, 0.5])
 print("x0 = " + str(x0))
 
 # Set controls
 Us = cs.DM(Us).T
-#print("Us = " + str(Us))
 
 # Set measurements
 if fit_imu:
-  Ys = cs.horzcat(y_roll, y_pitch, y_acc_0, y_acc_1, y_acc_2, y_gyr_0, y_gyr_1, y_gyr_2).T
+    Ys = cs.horzcat(y_roll, y_pitch, y_acc_0, y_acc_1, y_acc_2, y_gyr_0, y_gyr_1, y_gyr_2).T
 else:
-  Ys = cs.horzcat(y_roll, y_pitch).T
+    Ys = cs.horzcat(y_roll, y_pitch).T
 
 
 # Choose initial state confidence matrix
@@ -120,16 +106,12 @@ Q = cs.DM(model_confidence_vec)
 sensor_confidence = {}
 sensor_confidence['roll'] = 1e2
 sensor_confidence['pitch'] = 1e2
-#sensor_confidence['roll'] = 1e6
-#sensor_confidence['pitch'] = 1e6
 if fit_imu:
   acc_conf = 1e-1
-  #acc_conf = 1e3
   sensor_confidence['acc_x'] = acc_conf
   sensor_confidence['acc_y'] = acc_conf
   sensor_confidence['acc_z'] = acc_conf
   gyr_conf = 1e-1
-  #gyr_conf = 1e4
   sensor_confidence['gyr_x'] = gyr_conf
   sensor_confidence['gyr_y'] = gyr_conf
   sensor_confidence['gyr_z'] = gyr_conf
@@ -156,12 +138,6 @@ param_confidence['Izz_COM'] = 1e0
 param_confidence['pos_center_of_mass_wrt_4'] = [1e-1, 1e0, 1e0]
 param_confidence['pos_aileron_aerodynamic_center_wrt_4'] = [1e0, 1e0, 1e0]
 param_confidence['pos_elevator_aerodynamic_center_wrt_4'] = [1e0, 1e0, 1e0]
-#param_confidence['pos_imu_wrt_4'] = [1e3, 1e3, 1e3]
-#param_confidence['rot_imu_wrt_4'] = [1e3, 1e3, 1e3]
-#param_confidence['pos_4_wrt_3'] = [1e6, 1e6, 1e6]
-#param_confidence['pos_3_wrt_2'] = [1e6, 1e6, 1e6]
-#param_confidence['S_A'] = 1e3
-#param_confidence['S_E'] = 1e3
 param_confidence['C_LA_0'] = 1e0      # The coefficients tend to be larger
 param_confidence['C_LA_max'] = 1e0    # in magnitude than the other parameters
 param_confidence['C_DA_0'] = 1e0      # so we allow for larger deviation to 
@@ -178,14 +154,6 @@ param_confidence['mu_theta'] = 1e0
 assert set(param) == set(param_confidence), "Confidence-dictionary has to have the same entries as param!"
 param_confidence_vec = np.vstack(np.concatenate([np.array(val).flatten() for val in param_confidence.values()]))
 S = cs.DM(param_confidence_vec)
-
-"""
-assert set(param) == set(param_variances), "Confidence-dictionary has to have the same entries as param!"
-param_variances_vec = np.vstack(np.concatenate([np.array(val).flatten() for val in param_variances.values()]))
-S = cs.DM(param_variances_vec)
-S = 1/S
-print(S)
-"""
 
 # Create an identificator
 time_start = time.time()

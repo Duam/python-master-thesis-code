@@ -64,7 +64,7 @@ dt = 0.05
 T = 30
 N = len(data)
 #N = min([int(T/dt), len(data)])
-tAxis = (data['timestamp'] - data['timestamp'][0]).dt.total_seconds()[:N]
+tAxis = (data['timestamp'] - data['timestamp'][0]).timestep.total_seconds()[:N]
 
 # Compute some statistics
 ctrl = data['VE2_KIN4_SET_0'][:N]

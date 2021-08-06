@@ -16,7 +16,6 @@ param_file_in = "params_initial.json"
 param_file_out = "./params_identified_ss_new.json"
 param_vars_file_out = "params_identified_ss_variances.json"
 
-""" ================================================================================================================ """
 # Check if input params exist. If not, create them
 input_file = Path(param_file_in)
 if not input_file.exists():
@@ -47,8 +46,6 @@ print("NX = " + str(NX))
 print("NZ = " + str(NZ))
 print("NP = " + str(NP))
 print("NY = " + str(NY))
-
-""" ================================================================================================================ """
 
 # Load data
 print("Loading dataset " + dataset_path)
@@ -94,18 +91,6 @@ y_covar_data = cs.diag(cs.vertcat(
 # Get model parameter guess
 p0_mean_data = model.p0()
 p0_covar_data = 1e0 * cs.DM.eye(model.NP())
-
-"""
-print("Steady state information: ===")
-print("control: " + str(u))
-print("Roll: " + str(roll) + " rad (" + str(roll*360/(2*np.pi)) + "°)")
-print("Pitch: " + str(pitch) + " rad (" + str(pitch*360/(2*np.pi)) + "°)")
-print("State: " + str(x_ss))
-print("State derivative: " + str(xdot_ss))
-print("Accelerometer: " + str(y_acc_ss))
-print("Gyroscope: " + str(y_gyr_ss))
-print("=============================")
-"""
 
 # Create cholesky decomposition
 DUMMY = cs.SX.sym('DUMMY', NP+NY, NP+NY)
@@ -220,16 +205,6 @@ for key in w_sol.keys():
 # Compute covariance of result, second try
 # https://support.sas.com/documentation/cdl/en/statug/63962/HTML/default/viewer.htm#statug_nlin_sect027.htm
 M = NX + NZ
-"""
-A = dgdp_fun(w_sol, p_sol).T.full()
-B = hess_f_fun(w_sol, p_sol).full()
-Q, R = linalg.qr(A)
-Z = Q[:,NX+NZ:]
-inner = cs.mtimes([Z.transpose(), B, Z])
-outer = cs.mtimes([Z, linalg.inv(inner), Z.transpose()])
-p_covar_diag = cs.diag(outer)[NX+NZ:]
-print(p_covar_diag)
-"""
 
 # Compute rank of jacobians to check condition
 print("n = " + str(w_sol.shape[0]))
@@ -254,7 +229,6 @@ print("Diagonals: " + str(cs.diag(Sigma)))
 
 eigvals, eigvecs = linalg.eig(C)
 print(eigvals)
-#quit(0)
 
 # Put parameters and its variances in a dict
 idx = 0
@@ -286,10 +260,10 @@ for key in model_params.keys():
 print("===============================================")
 print("Writing identified parameters to", param_file_out)
 with open(param_file_out, 'w') as outfile:
-  json.dump(identified_param, outfile, indent=4)
+    json.dump(identified_param, outfile, indent=4)
 
 # Write variances of parameters to other json file
 print("===============================================")
 print("Writing identified parameters to", param_vars_file_out)
 with open(param_vars_file_out, 'w') as outfile:
-  json.dump(identified_param_vars, outfile, indent=4)
+    json.dump(identified_param_vars, outfile, indent=4)
