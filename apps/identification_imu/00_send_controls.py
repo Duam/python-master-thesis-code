@@ -18,8 +18,6 @@ parser.add_argument(
   help="Actuation signal type. May be \"SS\", \"RECT\", or \"SINE\""
 )
 
-""" ================================================================================================================ """
-
 # Fetch arguments
 args = parser.parse_args()
 totalTime = float(args.capture_time)
@@ -27,50 +25,26 @@ signal_type = args.signal_type
 
 # Initialize ZCM
 zcm = ZCM(carzcm.url)
-if(not zcm.good()):
+if not zcm.good():
   raise Exception("ZCM not good")
 
-""" ================================================================================================================ """
-
-# Create SIGINT handler for quick stop
 def signal_handler(sig, frame):
     print('Ctrl+C: Exiting.')
     zcm.stop()
     quit(0)
 
-
-# Register signal
 signal.signal(signal.SIGINT, signal_handler)
-
-""" ================================================================================================================ """
 
 dt = 1/50.
 N_approx = int(totalTime/dt)
 M = 10
 
-def rectangle_excitation(k,N):
-  """rectangle_excitation A rectangle signal that starts fast and goes slower with time
-  Args:
-    k[int] -- The current sample number
-    N[int] -- The number of samples after which the rectangle switches to a slower mode
-  Returns:
-    A rectangle signal
-  """
-  return rectangle(k, 2**int(k/float(N)))
-
-""" ================================================================================================================ """
-
 # Capture for T seconds
 print("Sendinc controls for " + str(totalTime) + " seconds ..")
-# Start zcm
 zcm.start()
-
-# Get startup time
 startTime = time.time()
 lastTime = startTime
-# Initialize iterations
 k = 0
-# Simulation main loop
 print("Start.")
 while True:
 
@@ -89,7 +63,10 @@ while True:
         if signal_type == "SS":
             u = 0.5
         elif signal_type == "RECT":
-            u = rectangle_excitation(N_approx - k - steadySamples, int(N_approx / M))
+            # A rectangle signal that starts fast and goes slower with time
+            current_sample = N_approx - k - steadySamples
+            num_samples_until_slowdown = int(N_approx / M)
+            rectangle(current_sample, 2 ** int(current_sample / float(num_samples_until_slowdown)))
         elif signal_type == "SINE":
             u = 0.5 + 0.5 * np.sin(k * dt - steadyTime)
         else:

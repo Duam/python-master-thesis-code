@@ -13,27 +13,27 @@ today = datetime.datetime.now().strftime("%Y_%m_%d")
 # Parse arguments:
 parser = argparse.ArgumentParser(description='Identification pipeline step 1: Data collection')
 parser.add_argument(
-  "-t", "--time",
-  dest='capture_time', default='1',
-  help="The total capture time"
+    "-t", "--time",
+    dest='capture_time', default='1',
+    help="The total capture time"
 )
 parser.add_argument(
-  "-s", "--signal-type",
-  dest='signal_type',
-  help="Actuation signal type. May be \"SS\", \"RECT\", or \"SINE\""
+    "-s", "--signal-type",
+    dest='signal_type',
+    help="Actuation signal type. May be \"SS\", \"RECT\", or \"SINE\""
 )
 parser.add_argument(
-  '-v', '--virtual_experiment',
-  dest='is_virtual_experiment', default='True',
-  help="Flag if this is a virtual_experiment experiment. If yes, the output file"
-        " gets a \"VIRTUAL\" prefix, otherwise \"PHYSICAL\"."
+    '-v', '--virtual_experiment',
+    dest='is_virtual_experiment', default='True',
+    help="Flag if this is a virtual_experiment experiment. If yes, the output file"
+         " gets a \"VIRTUAL\" prefix, otherwise \"PHYSICAL\"."
 )
 
 args = parser.parse_args()
 
 if not args.signal_type:
-  print("Choose signal type (argument -s)")
-  quit(0)
+    print("Choose signal type (argument -s)")
+    quit(0)
 
 # Fetch arguments
 totalTime = float(args.capture_time)
@@ -58,7 +58,6 @@ print("Output file prefix: " + out_file_prefix)
 os.mkdir(out_path)
 print("Created folder " + out_path)
 
-""" ================================================================================================================ """
 # Define datasets
 ctrl = Dataset(out_file_prefix+"CONTROL.csv", name="control")
 roll = Dataset(out_file_prefix+"ROLL.csv", name="roll")
@@ -67,161 +66,137 @@ yaw = Dataset(out_file_prefix+"YAW.csv", name="yaw")
 acc = Dataset(out_file_prefix+"LINEAR_ACCELERATION.csv", name="acc")
 gyr = Dataset(out_file_prefix+"ANGULAR_VELOCITY.csv", name="gyr")
 sim_state = Dataset(out_file_prefix+"SIMULATOR_STATE.csv", name="sim_state")
-
-""" ================================================================================================================ """
-
 use_receive_timestamp = True
 
 # Define the ZCM subscription callbacks
-def onNewControl(channel, message):
-  global ctrl
-  timestamp = int(time.time()*1e9) if use_receive_timestamp else int(message.ts)
-  ctrl.data += [( timestamp, [float(message.values[0]) ] )]
+def control_cb(channel, message):
+    global ctrl
+    timestamp = int(time.time()*1e9) if use_receive_timestamp else int(message.ts)
+    ctrl.data += [( timestamp, [float(message.values[0]) ] )]
 
-def onNewRoll(channel, message):
-  global roll
-  timestamp = int(time.time()*1e9) if use_receive_timestamp else int(message.ts)
-  roll.data += [( timestamp, [float(message.values[0]) ] )]
+def roll_measurement_cb(channel, message):
+    global roll
+    timestamp = int(time.time()*1e9) if use_receive_timestamp else int(message.ts)
+    roll.data += [( timestamp, [float(message.values[0]) ] )]
 
-def onNewPitch(channel, message):
-  global pitch
-  timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
-  pitch.data += [( timestamp, [float(message.values[0])]  )]
-  
-def onNewYaw(channel, message):
-  global yaw
-  timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
-  yaw.data += [( timestamp, [float(message.values[0])] )]
-  
-def onNewLinearAcceleration(channel, message):
-  global acc
-  timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
-  acc.data += [( timestamp, [float(elem) for elem in message.values[0:3]] )]
+def pitch_measurement_cb(channel, message):
+    global pitch
+    timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
+    pitch.data += [( timestamp, [float(message.values[0])]  )]
 
-def onNewAngularVelocity(channel, message):
-  global gyr
-  timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
-  gyr.data += [( timestamp, [float(elem) for elem in message.values[0:3]] )]
+def yaw_measurement_cb(channel, message):
+    global yaw
+    timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
+    yaw.data += [( timestamp, [float(message.values[0])] )]
 
-def onNewSimulatorState(channel, message):
-  global sim_state
-  timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
-  sim_state.data += [( timestamp, [float(elem) for elem in message.values[0:7]])]
+def acc_measurement_cb(channel, message):
+    global acc
+    timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
+    acc.data += [( timestamp, [float(elem) for elem in message.values[0:3]] )]
+
+def gyro_measurement_cb(channel, message):
+    global gyr
+    timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
+    gyr.data += [( timestamp, [float(elem) for elem in message.values[0:3]] )]
+
+def simulator_state_cb(channel, message):
+    global sim_state
+    timestamp = int(time.time() * 1e9) if use_receive_timestamp else int(message.ts)
+    sim_state.data += [( timestamp, [float(elem) for elem in message.values[0:7]])]
 
 # Initialize ZCM 
 zcm = ZCM(carzcm.url)
-if(not zcm.good()):
-  raise Exception("ZCM not good")
+if not zcm.good():
+    raise Exception("ZCM not good")
 
 # Subscribe to the channels
-zcm.subscribe(carzcm.control_elevator_channel, timestamped_vector_float, onNewControl)
-zcm.subscribe(carzcm.out_roll_channel, timestamped_vector_float, onNewRoll)
-zcm.subscribe(carzcm.out_pitch_channel, timestamped_vector_float, onNewPitch)
-zcm.subscribe(carzcm.out_yaw_channel, timestamped_vector_double, onNewYaw)
-zcm.subscribe(carzcm.out_acc_channel, timestamped_vector_float, onNewLinearAcceleration)
-zcm.subscribe(carzcm.out_gyr_channel, timestamped_vector_float, onNewAngularVelocity)
+zcm.subscribe(carzcm.control_elevator_channel, timestamped_vector_float, control_cb)
+zcm.subscribe(carzcm.out_roll_channel, timestamped_vector_float, roll_measurement_cb)
+zcm.subscribe(carzcm.out_pitch_channel, timestamped_vector_float, pitch_measurement_cb)
+zcm.subscribe(carzcm.out_yaw_channel, timestamped_vector_double, yaw_measurement_cb)
+zcm.subscribe(carzcm.out_acc_channel, timestamped_vector_float, acc_measurement_cb)
+zcm.subscribe(carzcm.out_gyr_channel, timestamped_vector_float, gyro_measurement_cb)
 if is_virtual_experiment:
-  zcm.subscribe("CAR_SIM_STATE", timestamped_vector_double, onNewSimulatorState)
-
-""" ================================================================================================================ """
+    zcm.subscribe("CAR_SIM_STATE", timestamped_vector_double, simulator_state_cb)
 
 # Create SIGINT handler for quick stop
 def signal_handler(sig, frame):
-  print('Ctrl+C: Exiting.')
-  zcm.stop()
-  quit(0)
-  
+    print('Ctrl+C: Exiting.')
+    zcm.stop()
+    quit(0)
+
 # Register signal
 signal.signal(signal.SIGINT, signal_handler)
 
-""" ================================================================================================================ """
-
 # Capture for T seconds
 print ("Capturing for " + str(totalTime) + " seconds ..")
-# Start zcm
 zcm.start()
-# Sleep
 time.sleep(totalTime)
-# Wake up
 zcm.stop()
 print("Stop.")
 
 # Check data
 do_abort = False
 for dataset in ctrl,roll,pitch,yaw,acc,gyr:
-  # Get dataset
-  filename = dataset.filename
-  name = dataset.name
-  data = dataset.data
-
-  if len(data) == 0:
-    print(bcolors.FAIL + "Dataset \"" + name + "\" is empty!" + bcolors.ENDC)
-    do_abort = True
+    filename = dataset.filename
+    name = dataset.name
+    data = dataset.data
+    if len(data) == 0:
+        print(bcolors.FAIL + "Dataset \"" + name + "\" is empty!" + bcolors.ENDC)
+        do_abort = True
 
 if do_abort:
-  print("One or more datasets were empty. Aborting.")
-  quit(0)
-
-""" ================================================================================================================ """
+    print("One or more datasets were empty. Aborting.")
+    quit(0)
 
 # Store inputs in csv file
 print("Storing data as csv..")
 
 for dataset in ctrl,roll,pitch,yaw,acc,gyr:
-  # Get dataset
-  filename = dataset.filename
-  name = dataset.name
-  data = dataset.data
-
-  # Open csv file
-  with open(filename, 'w') as outfile:
-
-    # Determine column names
-    firstRow = [ 'timestamp' ]
-    if len(data[0][1]) > 1:
-      for k in range(len(data[0][1])):
-        firstRow += [ name+"_"+str(k) ]
-    else:
-      firstRow += [ name ]
-
-    # Write first row (metadata)
-    writer = csv.writer(outfile)
-    writer.writerow(firstRow)
-
-    # Write actual data
-    for k in range(len(data)):
-      timestamp = data[k][0]
-      values = data[k][1]
-      writer.writerow([timestamp,*values])
-
-  print(name + " written to " + filename)
-
-if is_virtual_experiment:
-  for dataset in [sim_state]:
-    # Get dataset
     filename = dataset.filename
     name = dataset.name
     data = dataset.data
-
-    # Open csv file
     with open(filename, 'w') as outfile:
 
-      # Determine column names
-      firstRow = [ 'timestamp' ]
-      if len(data[0][1]) > 1:
-        for k in range(len(data[0][1])):
-          firstRow += [ name+"_"+str(k) ]
-      else:
-        firstRow += [ name ]
+        # Determine column names
+        firstRow = [ 'timestamp' ]
+        if len(data[0][1]) > 1:
+            for k in range(len(data[0][1])):
+                firstRow += [ name+"_"+str(k) ]
+        else:
+            firstRow += [ name ]
 
-      # Write first row (metadata)
-      writer = csv.writer(outfile)
-      writer.writerow(firstRow)
-
-      # Write actual data
-      for k in range(len(data)):
-        timestamp = data[k][0]
-        values = data[k][1]
-        writer.writerow([timestamp,*values])
+        # Write metadata first and then data
+        writer = csv.writer(outfile)
+        writer.writerow(firstRow)
+        for k in range(len(data)):
+            timestamp = data[k][0]
+            values = data[k][1]
+            writer.writerow([timestamp,*values])
 
     print(name + " written to " + filename)
+
+if is_virtual_experiment:
+    for dataset in [sim_state]:
+        filename = dataset.filename
+        name = dataset.name
+        data = dataset.data
+        with open(filename, 'w') as outfile:
+
+            # Determine column names
+            firstRow = [ 'timestamp' ]
+            if len(data[0][1]) > 1:
+                for k in range(len(data[0][1])):
+                    firstRow += [ name+"_"+str(k) ]
+            else:
+                firstRow += [ name ]
+
+            # Write metadata first and then actual data
+            writer = csv.writer(outfile)
+            writer.writerow(firstRow)
+            for k in range(len(data)):
+                timestamp = data[k][0]
+                values = data[k][1]
+                writer.writerow([timestamp,*values])
+
+        print(name + " written to " + filename)
