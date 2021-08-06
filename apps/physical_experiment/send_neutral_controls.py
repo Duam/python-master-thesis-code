@@ -5,7 +5,7 @@ from thesis_code.utils.zcm_constants import carousel_zcm_constants as carzcm
 
 # Initialize ZCM
 zcm = ZCM(carzcm.url)
-if (not zcm.good()):
+if not zcm.good():
     raise Exception("ZCM not good")
 
 # Create control messages
@@ -20,8 +20,6 @@ control_messages[0].values = [0.375]
 control_messages[1].values = [0.475]
 control_messages[2].values = [0.5]
 control_messages[3].values = [0.5]
-
-""" ================================================================================================================ """
 
 # Start zcm, let this thread sleep a while, then stop
 print("Sending controls..")

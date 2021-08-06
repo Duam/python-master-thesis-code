@@ -10,16 +10,12 @@ from thesis_code.simulator import CarouselSimulator
 
 # Create a simulation model
 param_sim = CarouselModel.getDefaultParams()
-#param_sim['carousel_speed'] = 1e-16 # May not be zero
-# TODO: Change some parameters
 model_sim = CarouselModel(param_sim)
 
 # Set initial state and noise properties
-x_ss_sim, z_ss_sim, u_ss_sim = model_sim.get_steady_state() # Fails with speed=0
+x_ss_sim, z_ss_sim, u_ss_sim = model_sim.get_steady_state()
 v_mean_sim  =  0e0 * np.ones(model_sim.NY())
 v_covar_sim =  0e-3 * np.eye(model_sim.NY())
-#v_covar_sim[6,6] = 0e-4
-#v_covar_sim[7,7] = 0e-4
 w_mean_sim  =  0e0 * np.ones(model_sim.NX())
 w_covar_sim =  0e0 * np.eye(model_sim.NX())
 
@@ -39,7 +35,7 @@ print("z0 = " + str(z_ss_sim))
 print("u0 = " + str(u_ss_sim))
 
 
-def onNewControl(channel, message) -> None:
+def control_cb(channel, message) -> None:
     """Callback that executes when a new control message arrives
     :param channel: The zcm channel to listen to
     :param message: The message arriving
@@ -55,7 +51,7 @@ if not zcm.good():
     raise Exception("ZCM not good")
 
 # Subscribe to the channels
-zcm.subscribe(carousel_zcm_constants.control_elevator_channel, timestamped_vector_float, onNewControl)
+zcm.subscribe(carousel_zcm_constants.control_elevator_channel, timestamped_vector_float, control_cb)
 
 
 def signal_handler(sig, frame) -> None:
@@ -102,23 +98,16 @@ dt = 1/50.
 lastTime = startTime
 print("Start.")
 while True:
-
-    """ === Simulation === """
-
     # Simulate one step
     xf_k, zf_k, y0_k = simulator.simulate_timestep(u[0], dt)
     yaw = xf_k[2].full()
 
-
     # Extract measurements
     y0_k = y0_k.full()
-    #y_angular_velocity = y0_k[0:3]
-    #y_linear_acceleration = y0_k[3:6]
     y_yaw = np.mod(yaw, 93*2*np.pi)
     y_roll = y0_k[0]
     y_pitch = y0_k[1]
 
-    """ === Publishing === """
     nowTime = time.time()
     timestamp = int(nowTime*1e9)
 
@@ -137,22 +126,10 @@ while True:
     yaw_msg.values = y_yaw
     zcm.publish(carousel_zcm_constants.out_yaw_channel, yaw_msg)
 
-    # Publish BNO acceleration
-    """
-    acc_msg.ts = timestamp
-    acc_msg.values = y_linear_acceleration
-    zcm.publish(carousel_zcm_constants.out_acc_channel, acc_msg)
-    # Publish BNO angular velocity
-    gyr_msg.ts = timestamp
-    gyr_msg.values = y_angular_velocity
-    zcm.publish(carousel_zcm_constants.out_gyr_channel, gyr_msg)
-    """
     # Publish internal state
     state_msg.ts = timestamp
     state_msg.values = xf_k.full()
     zcm.publish("CAR_SIM_STATE", state_msg)
-
-    """ === Timing === """
 
     # calculate sleep time
     k = k + 1
