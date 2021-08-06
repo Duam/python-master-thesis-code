@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 import thesis_code.utils.data_processing_tools as proc
 import matplotlib
-from matplotlib.backends.backend_pgf import FigureCanvasPgf
-matplotlib.backend_bases.register_backend('pdf', FigureCanvasPgf)
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pgf import FigureCanvasPgf
 from matplotlib.backends.backend_pdf import PdfPages
+
+matplotlib.backend_bases.register_backend('pdf', FigureCanvasPgf)
 pd.plotting.register_matplotlib_converters()
 matplotlib.rcParams.update({'font.size': 14})
 
@@ -33,10 +34,6 @@ keys = [
     'controller_info_0', 'controller_info_1', 'controller_info_2', 'controller_info_3', 'controller_info_4',
     'estimator_info_0', 'estimator_info_1', 'estimator_info_2', 'estimator_info_3', 'estimator_info_4'
 ]
-""" ================================================================================================================ """
-
-def toDeg(rad):
-    return rad * 360 / (2*np.pi)
 
 def round_to_extreme(val):
     maxval = val.max()

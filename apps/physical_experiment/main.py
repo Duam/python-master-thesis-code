@@ -16,18 +16,15 @@ from thesis_code.carousel_tarsel import Carousel_TargetSelector
 # Set OMP number of threads
 os.environ["OMP_NUM_THREADS"] = str(multiprocessing.cpu_count())
 
-import sys
-print("Using python interpreter: " + str(sys.executable))
-
-
 # Initialize ZCM
 zcm = ZCM(carzcm.url)
-if (not zcm.good()):
+if not zcm.good():
     raise Exception("ZCM not good")
 
-""" ================================================================================================================ """
-""" Send out steady state controls for all aerodynamc surfaces """
+
 def send_neutral_controls():
+    """Sends out steady state controls for all aerodynamic surfaces.
+    """
     print("Sending neutral controls to Half-Wing..")
     timestamp = int(time.time()*1e9)
     # Aileron
@@ -54,7 +51,8 @@ def send_neutral_controls():
     u_ss_kin4_msg.ts = timestamp
     u_ss_kin4_msg.values = [0.5]
     zcm.publish(carzcm.control_elevator_channel, u_ss_kin4_msg)
-""" ================================================================================================================ """
+
+
 # Create keypress handler for state transition
 request_next_state = False
 def on_press(key):
@@ -66,20 +64,19 @@ def on_press(key):
 listener = Listener(on_press=on_press, on_release=None)
 listener.start()
 
-# Create SIGINT handler for quick stop
+
 def signal_handler(sig, frame):
     print('Ctrl+C: Exiting.')
     send_neutral_controls()
     zcm.stop()
     quit(0)
 
-# Register signal
+
+# Register Ctrl+C signal
 signal.signal(signal.SIGINT, signal_handler)
 
-""" ================================================================================================================ """
-
-# Sample frequency is 20 (?) Hz
-dt = 1.0 / 20.0
+# Sample frequency is 20 Hz
+dt = 1. / 20.
 dt_ctr = 1. / 20.
 
 # Estimation and control horizons
@@ -91,25 +88,18 @@ N_ctr = 3
 verbose = False
 jit = True
 expand = True
-
 verbose_estimator = False
 verbose_controller = False
 verbose_target_selector = False
-
 enable_estimator = True
 enable_controller = True
 enable_target_selector = True
-
 use_direct_angle_measurement = True
-
-""" ================================================================================================================ """
-"""                                                 Create a model                                                   """
 
 # Load identified parameters
 import json
 param = {}
 path = "../carousel_identification/params_identified_dynamic_imu.json"
-#path = "../carousel_identification/params_identified_dynamic.json"
 print("Loading identified parameter set " + path)
 with open(path, 'r') as file:
     param = json.load(file)
@@ -121,13 +111,18 @@ else:
     model = CarouselModel(param, with_angle_output=False, with_imu_output=True)
 
 # Fetch sizes and steady state
-NX, NZ, NU, NY, NP = (model.NX(), model.NZ(), model.NU(), model.NY(), model.NP())
+num_states = model.NX()
+num_alg_vars = model.NZ()
+num_controls = model.NU()
+num_measurements = model.NY()
+num_params = model.NP()
 x_ss_est, z_ss_est, u_ss_est = model.get_steady_state()
 
-print("NX = " + str(NX) + ", NZ = " + str(NZ) + ", NU = " + str(NU) + ", NY = " + str(NY) + ", NP = " + str(NP))
-
-""" ================================================================================================================ """
-"""                                           Create a control components                                            """
+print(f"# States: {num_states}")
+print(f"# Algebraic variables: {num_alg_vars}")
+print(f"# Controls: {num_controls}")
+print(f"# Measurements: {num_measurements}")
+print(f"# Parameters: {num_params}")
 
 # Create a target-selector
 if enable_target_selector:
@@ -135,49 +130,51 @@ if enable_target_selector:
     T_ts = 10
 
     # Choose a signal type    
-    signal = lambda t,T: 0.5
+    signal = lambda t, T: 0.5
     signal = signals.rectangle
-    #signal = signals.triangle
-    #signal = signals.sawtooth_periodic
-
-    # Choose signal amplitude
-    amplitude = 0.20 # Jonas good
-    #amplitude = 0.30
-    #amplitude = 0.40 # Jonas bad
-    #amplitude = 0.50
-
-    # Choose signal offset
-    offset = 0.0    
+    amplitude = 0.20
+    offset = 0.0
     
     # Construct signal and create target selector.
-    roll_ref = lambda t: x_ss_est[0] + amplitude/2. * (signal(t,T_ts) - 0.5) - offset
+    roll_ref = lambda t: x_ss_est[0] + amplitude/2. * (signal(t, T_ts) - 0.5) - offset
     #roll_ref = lambda t: amplitude * (signal(t,T_ts) - 0.5) - offset
-    target_selector = Carousel_TargetSelector(model, T_ts, N_ts, roll_ref, verbose=verbose_target_selector)
+    target_selector = Carousel_TargetSelector(
+        model,
+        T_ts,
+        N_ts,
+        roll_ref,
+        verbose=verbose_target_selector
+    )
 
 # Create an estimator
 if enable_estimator:
-    estimator = Carousel_MHE(model, N_est, dt, verbose=verbose_estimator, do_compile=jit, expand=expand)
+    estimator = Carousel_MHE(
+        model,
+        N_est,
+        dt,
+        verbose=verbose_estimator,
+        do_compile=jit,
+        expand=expand
+    )
     print(estimator.ocp)
-    #S0_mhe = 1e4 * np.array([1e2, 1e0, 1e1, 1e0, 1e2]).reshape((NX,1))
-    #Q_mhe = 1e5* np.array([1e2, 1e2, 1e0, 1e0, 1e1]).reshape((NX,1))
-    Q_mhe = np.array([1e2, 1e2, 1e0, 1e0, 1e1]).reshape((NX,1))
+    Q_mhe = np.array([1e2, 1e2, 1e0, 1e0, 1e1]).reshape((num_states, 1))
     S0_mhe = 1e-2 * Q_mhe
     if not use_direct_angle_measurement:
-        R_mhe = np.array([1e-1, 1e-1, 1e-1, 1e0, 1e0, 1e0]).reshape((NY,1))
+        R_mhe = np.array([1e-1, 1e-1, 1e-1, 1e0, 1e0, 1e0]).reshape((num_measurements, 1))
     if use_direct_angle_measurement:
-        R_mhe = 1e1 * np.ones((NY,1))
+        R_mhe = 1e1 * np.ones((num_measurements, 1))
 
 # Create a controller
 if enable_controller:
     controller = Carousel_MPC(model, N_ctr, dt_ctr, verbose=verbose_controller, do_compile=jit, expand=expand)
     print(controller.ocp)
-    Q_mpc = 1e3 * np.ones((NX,1))
+    Q_mpc = 1e3 * np.ones((num_states, 1))
     Q_mpc[0] = 1e3
     Q_mpc[2] = 1e4
     Q_mpc[1] = 1e0
     Q_mpc[3] = 1e2
     Q_mpc[4] = 1e3
-    R_mpc = 1e3 * np.ones((NU,1))
+    R_mpc = 1e3 * np.ones((num_controls, 1))
     S_mpc = 1e-2* Q_mpc #1e4 * np.ones((NX,1))
     S_mpc[0] = 1e1 * Q_mpc[0]
     S_mpc[1] = 1e2 * Q_mpc[1]
@@ -201,21 +198,21 @@ def send_control_configuration():
     msg.ts = int(time.time()*1e9)
     
     if enable_estimator:
-        msg.len = NX
+        msg.len = num_states
         msg.values = Q_mhe
         zcm.publish("Q_mhe", msg)
         msg.values = S0_mhe
         zcm.publish("S0_mhe", msg)
-        msg.len = NY
+        msg.len = num_measurements
         msg.values = R_mhe
         zcm.publish("R_mhe", msg)
     if enable_controller:
-        msg.len = NX
+        msg.len = num_states
         msg.values = Q_mpc
         zcm.publish("Q_mpc", msg)
         msg.values = S_mpc
         zcm.publish("S_mpc", msg)
-        msg.len = NU
+        msg.len = num_controls
         msg.values = R_mpc
         zcm.publish("R_mpc", msg)
     if enable_target_selector:
@@ -227,7 +224,7 @@ def send_control_configuration():
 
 
 # Define measurement buffer and callback
-current_measurement = [ 0.0 for k in range(NY) ]
+current_measurement = [0.0 for k in range(num_measurements)]
 def onNewMeasurement(channel, message):
     global current_measurement
     current_measurement = message.values

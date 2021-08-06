@@ -11,14 +11,8 @@ today = datetime.datetime.now().strftime("%Y_%m_%d")
 
 # Parse arguments:
 parser = argparse.ArgumentParser(description='Data collection script for physical_experiment experiments')
-parser.add_argument(
-    "-t", "--time",
-    dest='capture_time', default='1',
-    help="The total capture time"
-)
-parser.add_argument(
-    '-v', '--virtual_experiment',
-    dest='is_virtual_experiment', default='True',
+parser.add_argument("-t", "--time",dest='capture_time', default='1',help="The total capture time")
+parser.add_argument('-v', '--virtual_experiment',dest='is_virtual_experiment', default='True',
     help="Flag if this is a virtual_experiment experiment. If yes, the output file"
          " gets a \"VIRTUAL\" prefix, otherwise \"PHYSICAL\"."
 )
@@ -37,7 +31,6 @@ file_prefix = carzcm.get_file_prefix(
 file_prefix += today + "_"
 print("File prefix: " + file_prefix)
 
-""" ================================================================================================================ """
 # Define datasets
 ctrl = Dataset(file_prefix + "CONTROL.csv", name="control")
 roll = Dataset(file_prefix + "ROLL.csv", name="roll")
@@ -45,9 +38,6 @@ pitch = Dataset(file_prefix + "PITCH.csv", name="pitch")
 yaw = Dataset(file_prefix + "YAW.csv", name="yaw")
 acc = Dataset(file_prefix + "LINEAR_ACCELERATION.csv", name="acc")
 gyr = Dataset(file_prefix + "ANGULAR_VELOCITY.csv", name="gyr")
-
-""" ================================================================================================================ """
-
 
 # Define the ZCM subscription callbacks
 def onNewControl(channel, message):
@@ -93,9 +83,6 @@ zcm.subscribe(carzcm.out_yaw_channel, timestamped_vector_float, onNewYaw)
 zcm.subscribe(carzcm.out_acc_channel, timestamped_vector_float, onNewLinearAcceleration)
 zcm.subscribe(carzcm.out_gyro_channel, timestamped_vector_float, onNewAngularVelocity)
 
-""" ================================================================================================================ """
-
-
 # Create SIGINT handler for quick stop
 def signal_handler(sig, frame):
     print('Ctrl+C: Exiting.')
@@ -105,8 +92,6 @@ def signal_handler(sig, frame):
 
 # Register signal
 signal.signal(signal.SIGINT, signal_handler)
-
-""" ================================================================================================================ """
 
 # Capture for T seconds
 print("Capturing for " + str(totalTime) + " seconds ..")

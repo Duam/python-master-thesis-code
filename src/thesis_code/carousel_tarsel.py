@@ -9,24 +9,27 @@ from thesis_code.utils.ParametricNLP import ParametricNLP
 
 
 class Carousel_TargetSelector:
-    """ An offline target selector for the carousel model.
-
-    Args:
-      model[CarouselWhiteBoxModel] -- The model
-      N[int] -- The number of discretized samples one revolution is divided into
-      reference[Callable] -- The airplane's roll angle reference as a function
-        of the carousel's yaw angle. Must be periodic wrt 2*pi
-
-    """
-    def __init__(self, model:CarouselModel, T:float, N:int, reference:Callable[[float], float], verbose:bool=False):
+    def __init__(
+            self,
+            model: CarouselModel,
+            time_per_revolution: float,
+            samples_per_revolution: int,
+            roll_reference: Callable[[float], float],
+    ):
+        """An offline target selector for the carousel model.
+        :param model: The model
+        :param time_per_revolution: The time it takes the carousel to complete one revolution.
+        :param samples_per_revolution: The number of discretized samples one revolution is divided into.
+        :param roll_reference: The airplane's roll angle reference as a function of the carousel's yaw angle.
+            Must be periodic wrt 2*pi
+        """
         # Fetch model
         self.model = model
-        self.verbose = verbose
 
         ## Fetch parameters ##
-        NX, NZ, NU, NY, NP = (model.NX(), model.NZ(), model.NU(), model.NY(), model.NP())
-        self.N = N # Number of discretized samples
-        self.T = T
+        num_states, NZ, NU, NY, NP = (model.NX(), model.NZ(), model.NU(), model.NY(), model.NP())
+        self.N = samples_per_revolution
+        self.T = time_per_revolution
         self.dt = self.T / self.N # Time step between samples
 
         #T = 2*np.pi / abs(model.constants['carousel_speed']) # Time of one revolution
@@ -52,12 +55,12 @@ class Carousel_TargetSelector:
 
         # Create the parametric NLP
         ocp = ParametricNLP('Carousel_TargetSelector')
-        ocp.add_decision_var('X', (NX,N+1))   # Differential states
+        ocp.add_decision_var('X', (num_states, N + 1))   # Differential states
         ocp.add_decision_var('Z', (NZ,N+1)) # Algebraic states
-        ocp.add_decision_var('Vx', (NX,Ncol))  # Differential states at collocation points
+        ocp.add_decision_var('Vx', (num_states, Ncol))  # Differential states at collocation points
         ocp.add_decision_var('Vz', (NZ,Ncol))  # Algebraic states at collocation points
         ocp.add_decision_var('U',  (NU,N)) # Controls
-        ocp.add_parameter('x0', (NX,1)) # Initial state
+        ocp.add_parameter('x0', (num_states, 1)) # Initial state
         ocp.add_parameter('z0', (NZ,1)) # Initial algebraic state
         ocp.add_parameter('P', (NP,1)) # Model parameters
         ocp.bake_variables()
@@ -102,11 +105,11 @@ class Carousel_TargetSelector:
 
             # Add collocation equations
             for i in range(ncol):
-                base = i * (NX+NZ)
+                base = i * (num_states + NZ)
                 G_colloc_ode_names.append('coll_'+str(k)+'_ode_node_'+str(i))
                 G_colloc_alg_names.append('coll_'+str(k)+'_alg_node_'+str(i))
-                G_colloc_ode.append(g_k[base   :base+NX])
-                G_colloc_alg.append(g_k[base+NX:base+NX+NZ])
+                G_colloc_ode.append(g_k[base   :base + num_states])
+                G_colloc_alg.append(g_k[base + num_states:base + num_states + NZ])
 
             # Enforce collocation equations
             ocp.add_equality('coll_'+str(k), g_k)
@@ -153,13 +156,10 @@ class Carousel_TargetSelector:
             opts = {
                 'hess_lag': hess_lag,
                 'expand': True,
-                'ipopt.print_level': 5 if self.verbose else 0,
-                'print_time': 5 if self.verbose else 0,
-                'ipopt.print_timing_statistics': 'no' if self.verbose else 'yes',
-                'ipopt.sb': 'no' if self.verbose else 'yes',
-                #'ipopt.tol': 1e-16,
-                #'ipopt.constr_viol_tol': 1e-16,
-                #'ipopt.acceptable_constr_viol_tol': 1e-16,
+                'ipopt.print_level': 5,
+                'print_time': 5,
+                'ipopt.print_timing_statistics': 'no',
+                'ipopt.sb': 'no',
             }
         )
 
@@ -188,11 +188,11 @@ class Carousel_TargetSelector:
         self.initialized = False
 
 
-    def simulateModel(self, x:DM, z:DM, u:DM, p:DM, dt:DM):
+    def simulateModel(self, x: DM, z: DM, u: DM, p: DM, dt: DM):
         step = self.integrator(x0=x,z0=z,p=vertcat(dt,p,u))
         return step['xf'], step['zf']
 
-    def init(self, x0:DM, z0:DM, W:DM):
+    def init(self, x0: DM, z0: DM, W: DM):
         print("Initializing Target selector..")
         assert not self.initialized, "Already initialized! Called twice?"
 
@@ -231,7 +231,6 @@ class Carousel_TargetSelector:
         X[:,-1] = Vx[:,-1]
         Z[:,-1] = Vz[:,-1]
 
-        print("Setting problem parameters and initial guess..")
         # Problem parameters:
         self.parameters = self.ocp.struct_p(0)
         self.parameters['x0'] = DM(x0)
@@ -245,15 +244,12 @@ class Carousel_TargetSelector:
         self.initial_guess['Vx'] = DM(Vx)
         self.initial_guess['Vz'] = DM(Vz)
         self.initial_guess['U']  = DM(U)
-
         self.initialized = True
 
 
     def call(self):
         print("Calling Target Selector!")
         assert self.initialized
-
-        # Solve!
         result = self.ocp.solve(self.initial_guess, self.parameters)
 
         # Fetch solution and remove duplicate elements
@@ -268,128 +264,39 @@ class Carousel_TargetSelector:
         Zref = cas.horzcat(Zsol, Zsol[:,0])
         Uref = cas.horzcat(Usol)
 
-        # Create the interpolation axis
-        #axis = [  (2*np.pi)*(float(k)/N) for k in range(N) ]
+        # Create interpolation functions
         axis = [ self.T * (float(k)/N) for k in range(N) ]
-        #axis_extended = axis + [2*np.pi]
         axis_extended = axis + [self.T]
-
-        # Create an interpolation function for U (zero-order hold)
         self.Uref_fun = interp1d(axis, Uref, fill_value="extrapolate", kind="zero")
-        #self.Xref_fun = interp1d(psi_axis_extended, Xref, kind="slinear") # or "linear"?
         self.Xref_fun = interp1d(axis_extended, Xref, kind="cubic")
-        #self.Zref_fun = interp1d(psi_axis_extended, Zref, kind="slinear")
         self.Zref_fun = interp1d(axis_extended, Zref, kind="cubic")
-
-        """
-        # Test the interpolation function for U
-        print("TEST 1 ================================")
-        for k in range(len(psi_axis)):
-          uref_orig = Uref[0,k]
-          uref_interp = self.Uref_fun(psi_axis[k])[0]
-          #print("k =", k, ", psi =", psi_axis[k], " -> u =", uref_interp, " (orig u =", uref_orig, ")")
-          assert uref_orig == uref_interp
-        
-        psi_axis_test_2 = [ (2*np.pi) * (float(k)/(2*N)) for k in range(2*N) ]
-        print("TEST 2 ================================")
-        for k in range(len(psi_axis_test_2)):
-          uref_orig = Uref[0,int(k/2.)]
-          psi = psi_axis_test_2[k]  + np.pi/(2*N) # Shift the angle a bit forward
-          psi_mod = np.mod(psi, 2*np.pi)
-          uref_interp = self.Uref_fun(psi_mod)[0]
-          #print("k =", k, ", psi =", psi_mod, " -> u =", uref_interp, "(orig u =", uref_orig, ")" )
-          assert uref_orig == uref_interp
-    
-        psi_axis_test_3 = [ (2*np.pi) * (float(k)/(2*N)) for k in range(4*N) ]
-        print("TEST 3 ================================")
-        for k in range(len(psi_axis_test_3)):
-          k_mod = np.mod(k, 2*N)
-          psi = psi_axis_test_3[k]  + np.pi/(2*N) # Shift the angle a bit forward
-          psi_mod = np.mod(psi, 2*np.pi)
-    
-          uref_orig = Uref[0,int(k_mod/2.)]
-          uref_interp = self.Uref_fun(psi_mod)[0]
-          #print("k =", k, ", psi =", psi, " (mod psi =", psi_mod, ") -> u =", uref_interp, "(orig u =", uref_orig, ")" )
-          assert uref_orig == uref_interp
-      
-        """
-        #print("Uref[0,:] =\n", Uref[0,::rev])
-        #print("Xref[2,:] =\n", Xref[2,::rev])
-
-
-
-        """ 
-        The MPC will later need a number of reference points that it can track. The first
-        reference point is the current state, the second one is the state that is one dt in
-        the future, and so on. We can use the arrays Xref and Uref, and express them as a 
-        function of the carousel yaw angle, which in turn is a linear function of time (the 
-        carousel yaw rate is constant). For this, we will use linear interpolation.
-        """
-
-        """
-        Disclaimer: Since the carousel model is a nonlinear system, we can not expect
-        that linearly interpolated controls lead to linearly interpolated states (not even approximated)!!!
-    
-        But: If we apply a zero-order hold to the controls, with a sufficiently high sampling rate,
-        maybe we can expect the states to behave linearly in between the sampling times.
-        That's why Uref_fun uses kind="nearest". This is a kind of zero-order hold that leads to the results
-        that we desire (as confirmed by the carousel_tarsel_test experiment). NOTE: kind="previous" did not 
-        do the kind of zero-order hold that I expected. nearest works better.
-    
-        THAT MEANS THAT THE OPEN-LOOP SYSTEM DOES NOT FOLLOW THE REFERENCE TRAJECTORY IF SAMPLED FASTER.
-        We still need a controller
-        """
-        print("==============================")
-        #return Xref[:,::rev], Zref[:,::rev], Uref[:,::rev]
         return Xsol, Zsol, Usol
 
 
-    def get_new_reference(self, t:float, dt:float, N:int):
-        """get_new_reference Returns a number of reference points that the system shall visit.
-
-        Args:
-          psi[float] -- The current carousel angle
-          dt[float] -- The sampling time
-          N[int] -- The amount of reference points to be returned
-
-        Returns:
-          Xref[list], Uref[list] -- Lists of length N with states x and controls u that start at
-          carousel angle psi and are evenly spaced in time with spacing dt
+    def get_new_reference(self, t: float, dt: float, N: int):
+        """Returns a number of reference points that the system shall visit.
+        :param psi: The current carousel angle.
+        :param dt: The sampling time.
+        :param N: The amount of reference points to be returned.
+        :returns: Lists of length N with states x and controls u that start at
+            carousel angle psi and are evenly spaced in time with spacing dt
         """
-        # Reverse the psi axis if needed so we always work with monotonously increasing psi.
-        #sgn = float(self.rev)
-
         # Create the yaw-values that we will evaluate the interpolation function with
         t0 = t
         tN = t0 + (N+1) * dt
-        #psi_0 = sgn * float(psi)
-        #delta_psi = dt * abs(self.model.params['carousel_speed'])
-        #psi_T = psi_0 + (N+1) * delta_psi
 
         # Predict the yaw-angles for X, Z and U (U: shifted by half of a bin)
-        #psi_axis_XZ = np.linspace(psi_0, psi_T, N+1, endpoint=False)
-        #psi_axis_U = [ psi + delta_psi/2. for psi in psi_axis_XZ ]
         tAxis_XZ = np.linspace(t0, tN, N+1, endpoint=False)
         tAxis_U = [ t + dt/2. for t in tAxis_XZ ]
 
         # Map the angles into the interval [0,2*pi)
-        #psi_axis_XZ_mod = [ np.mod(sgn*psi,2*np.pi) for psi in psi_axis_XZ ]
-        #psi_axis_U_mod = [ np.mod(sgn*psi,2*np.pi) for psi in psi_axis_U ]
-        #tAxis_XZ_mod = [ np.mod(t,2*np.pi) for t in tAxis_XZ ]
-        #tAxis_U_mod = [ np.mod(t,2*np.pi) for t in tAxis_U ]
         tAxis_XZ_mod = [ np.mod(t,self.T) for t in tAxis_XZ ]
         tAxis_U_mod = [ np.mod(t,self.T) for t in tAxis_U ]
 
         # Compute the reference
-        #Xref = self.Xref_fun(psi_axis_XZ_mod)
-        #Zref = self.Zref_fun(psi_axis_XZ_mod)
-        #Uref = self.Uref_fun(psi_axis_U_mod)
         Xref = self.Xref_fun(tAxis_XZ_mod)
         Zref = self.Zref_fun(tAxis_XZ_mod)
         Uref = self.Uref_fun(tAxis_U_mod)
-
-        # Re-reverse the psi-values if needed so the state reference stays consistent
-        #Xref[2,:] = [ sgn * psi for psi in psi_axis_XZ ]
 
         # Return the reference
         return DM(Xref), DM(Zref), DM(Uref)
