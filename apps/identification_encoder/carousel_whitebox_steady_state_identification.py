@@ -49,7 +49,7 @@ dae = model.dae
 x_sym = cas.vertcat(*dae.x)
 z_sym = cas.vertcat(*dae.z)
 u_sym = cas.vertcat(*dae.u)
-p_sym = cas.vertcat(*dae.p)
+p_sym = cas.vertcat(*dae.params)
 
 # Function objects
 ode_fun = cas.Function('ode', [x_sym,z_sym,u_sym,p_sym], [cas.vertcat(*dae.ode)])

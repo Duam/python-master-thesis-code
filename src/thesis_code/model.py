@@ -245,7 +245,7 @@ class CarouselModel:
         x = cas.vertcat(*self.dae.x)
         z = cas.vertcat(*self.dae.z)
         u = cas.vertcat(*self.dae.u)
-        p = cas.vertcat(*self.dae.p)
+        p = cas.vertcat(*self.dae.params)
 
         # Create shorthand functions
         self.rotateView    = lambda x,src,dest,vec: self.get_vector_defined_in_x_viewed_from_y(src, dest, vec, x[2],
@@ -443,7 +443,7 @@ class CarouselModel:
         self.x_sym = x = cas.vertcat(*self.dae.x)
         self.z_sym = z = cas.vertcat(*self.dae.z)
         self.u_sym = u = cas.vertcat(*self.dae.u)
-        self.p_sym = p = cas.vertcat(*self.dae.p)
+        self.p_sym = p = cas.vertcat(*self.dae.params)
         self.ode_sym = ode = cas.vertcat(*self.dae.ode)
         self.alg_sym = alg = cas.vertcat(*self.dae.alg)
         self.out_sym = out = cas.vertcat(*self.dae.ydef)
@@ -506,7 +506,7 @@ class CarouselModel:
 
     def computeAileronAerodynamicsData(self, x, param):
         # Compute the effective wind wrt. aileron aerodynamic center
-        vel = self.vel_ACA(x,cas.vertcat(*self.dae.p)) #wrt 1
+        vel = self.vel_ACA(x, cas.vertcat(*self.dae.params)) #wrt 1
         #vel_norm2 = norm_2(vel)
         dir_nose = self.rotateView(x,4,1,vertcat(1,0,0))
         dir_wing = self.rotateView(x,4,1,vertcat(0,1,0))
@@ -530,7 +530,7 @@ class CarouselModel:
         #F_L = -0.5 * self.params['S_A'] * C_L * w_eff_proj_norm2 * cross_product(dir_wing, w_eff_proj)
         #F_D = 0.5 * self.params['S_A'] * C_D * w_eff_proj_norm2 * w_eff_proj
 
-        p = vertcat(*self.dae.p)
+        p = vertcat(*self.dae.params)
         self.alpha_A = cas.Function('alpha_E', [x,p], [alpha])
         self.CL_A = cas.Function('CL_A', [x,p], [C_L])
         self.CD_A = cas.Function('CD_A', [x,p], [C_D])
@@ -560,7 +560,7 @@ class CarouselModel:
 
     def computeElevatorAerodynamicsData(self, x, param):
         # Compute the effective wind wrt. elevator aerodynamic center
-        vel = self.vel_ACE(x,cas.vertcat(*self.dae.p)) #wrt 1
+        vel = self.vel_ACE(x, cas.vertcat(*self.dae.params)) #wrt 1
         #vel_norm2 = norm_2(vel)
 
         # In our model, the elevator tab changes the orientation of the elevator
@@ -594,7 +594,7 @@ class CarouselModel:
         #F_L = 0.5 * self.params['S_E'] * C_L * w_eff_proj_norm2 * cross_product(dir_wing, w_eff_proj)
         #F_D = 0.5 * self.params['S_E'] * C_D * w_eff_proj_norm2 * w_eff_proj
 
-        p = vertcat(*self.dae.p)
+        p = vertcat(*self.dae.params)
         self.alpha_E = cas.Function('alpha_E', [x,p], [alpha])
         self.CL_E = cas.Function('CL_E', [x,p], [C_L])
         self.CD_E = cas.Function('CD_E', [x,p], [C_D])

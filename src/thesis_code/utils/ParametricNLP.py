@@ -12,77 +12,66 @@ from typing import Callable
 
 
 class ParametricNLP:
+    def __init__(self, name = 'OP'):
+        """
+        A representation for the parametric optimization problem
 
-    """
-    A representation for the parametric optimization problem
+        S(p) = minimize:  J(w,p)
+                  w
+              subject to: g(w,p) = 0
+                          h(w,p) >= 0
 
-    S(p) = minimize:  J(w,p)
-              w
-          subject to: g(w,p) = 0
-                      h(w,p) >= 0
+           Usage is as follows:
+        1. Create the ParametricNLP object
+        2. Add decision variables and parameters
+        3. Get the internal casadi variables
+        4. Define a cost function
+        5. Define constraints and add them
+        (!) Keep step 2 and 3 separated
 
-       Usage is as follows:
-    1. Create the ParametricNLP object
-    2. Add decision variables and parameters
-    3. Get the internal casadi variables
-    4. Define a cost function
-    5. Define constraints and add them
-    (!) Keep step 2 and 3 separated
-    """
-
-
-    def __init__(self, name = 'OP', verbose = False):
-        """ Creates the empty problem.
-        Prepares casadi expressions and creates the optimization variables.
-
-        TODO: More docu
+        :param name: Identifier of the NLP
         """
         self.name = name
-        self.verbose = verbose
-
-        self.J = 0
-        self.w = {}
-        self.lbx = {}
-        self.ubx = {}
-        self.p = {}
-        self.g = {}
-        self.h = {}
-
-        self.nw = 0
-        self.np = 0
-        self.ng = 0
-        self.nh = 0
-
+        self.cost = 0
+        self.decision_vars = {}
+        self.decision_vars_lb = {}  # Lower bound
+        self.decision_vars_ub = {}  # Upper bound
+        self.params = {}
+        self.eq_constraints = {}
+        self.ineq_constraints = {}
+        self.num_decision_vars = 0
+        self.num_params = 0
+        self.num_eq_constraints = 0
+        self.num_ineq_constraints = 0
         self.current_params = struct_symMX([])
-        self.iterCb = None # The iteration-callback function
         self.variables_baked = False
 
-    def add_decision_var(self, name:str, shape:tuple):
+    def add_decision_var(self, name: str, shape: tuple):
         """ Adds a decision variable to the problem. """
         # Check if baking allowed and if entry already exists
         assert not self.variables_baked, 'Adding variables prohibited after baking'
-        assert name not in self.w.keys(), 'Key \'' + name + '\' already exists'
+        assert name not in self.decision_vars.keys(), 'Key \'' + name + '\' already exists'
         # Add entry and increase variable counter
-        self.w[name] = shape
-        self.nw += numpy.prod(shape)
+        self.decision_vars[name] = shape
+        self.num_decision_vars += numpy.prod(shape)
         # Print info string
-        if self.verbose: print("Added decision variable: " + name + ' ' + str(shape))
+        print("Added decision variable: " + name + ' ' + str(shape))
 
     def add_parameter(self, name: str, shape: tuple):
         """ Adds a parameter to the problem """
         # Check if baking allowed and if entry already exists
         assert not self.variables_baked, 'Adding variables prohibited after baking'
-        assert name not in self.p.keys(), 'Key ' + name + ' already exists'
+        assert name not in self.params.keys(), 'Key ' + name + ' already exists'
         # Add entry and increase variable counter
-        self.p[name] = shape
-        self.np += numpy.prod(shape)
+        self.params[name] = shape
+        self.num_params += numpy.prod(shape)
         # Print info string
-        if self.verbose: print("Added parameter: " + name + ' ' + str(shape))
+        print("Added parameter: " + name + ' ' + str(shape))
 
     def bake_variables(self):
         # Create structs for variables, parameters
-        self.struct_w = struct_symMX([entry(key, shape=self.w[key]) for key in self.w])
-        self.struct_p = struct_symMX([entry(key, shape=self.p[key]) for key in self.p])
+        self.struct_w = struct_symMX([entry(key, shape=self.decision_vars[key]) for key in self.decision_vars])
+        self.struct_p = struct_symMX([entry(key, shape=self.params[key]) for key in self.params])
         # Variables were baked successfully
         self.variables_baked = True
 
@@ -103,7 +92,7 @@ class ParametricNLP:
             problem's cost function. Must only use decision
             variables and parameters defined in the optimizaion problem.
         """
-        self.J = expr
+        self.cost = expr
 
     def add_equality(self, name:str, expr:MX):
         """ Adds an equality constraint to the problem
@@ -113,13 +102,11 @@ class ParametricNLP:
             constraint's LHS. Must only use decision variables and parameters
             defined in the optimization problem.
         """
-        # Check if entry already exists
-        assert name not in self.g.keys(), 'Key ' + name + ' already exists'
-        # Add entry and increase constraint counter
-        self.g[name] = expr
-        self.ng += numpy.prod(expr.shape)
+        assert name not in self.eq_constraints.keys(), 'Key ' + name + ' already exists'
+        self.eq_constraints[name] = expr
+        self.num_eq_constraints += numpy.prod(expr.shape)
         # Print an info string
-        if self.verbose: print("Added equality constraint: " + name + ' ' + str(expr.shape))
+        print("Added equality constraint: " + name + ' ' + str(expr.shape))
 
     def add_inequality(self, name:str, expr:MX):
         """ Adds an inequality constraint to the problem
@@ -129,13 +116,12 @@ class ParametricNLP:
             constraint's LHS. Must only use decision variables and parameters
             defined in the optimization problem.
         """
-        # Check if entry already exists
-        assert name not in self.h.keys(), 'Key \'' + name + '\' already exists'
+        assert name not in self.ineq_constraints.keys(), 'Key \'' + name + '\' already exists'
         # Add entry and increase constraint counter
-        self.h[name] = expr
-        self.nh += numpy.prod(expr.shape)
+        self.ineq_constraints[name] = expr
+        self.num_ineq_constraints += numpy.prod(expr.shape)
         # Print an info string
-        if self.verbose: print("Added inequality constraint: " + name + ' ' + str(expr.shape))
+        print("Added inequality constraint: " + name + ' ' + str(expr.shape))
 
     def init(self, is_qp = False,
              nlpsolver: str ='ipopt',
@@ -154,60 +140,29 @@ class ParametricNLP:
         assert self.variables_baked, "Variables need to be baked before init()!"
 
         # Create structs for constraints
-        self.struct_g = struct_symMX([entry(key, shape=self.g[key].shape) for key in self.g])
-        self.struct_h = struct_symMX([entry(key, shape=self.h[key].shape) for key in self.h])
+        self.struct_g = struct_symMX([entry(key, shape=self.eq_constraints[key].shape) for key in self.eq_constraints])
+        self.struct_h = struct_symMX([entry(key, shape=self.ineq_constraints[key].shape) for key in self.ineq_constraints])
 
         # Create structs for multipliers of variables, parameters, constraints
-        self.struct_lam_w = struct_symMX([entry(key, shape=self.w[key]) for key in self.w])
-        self.struct_lam_p = struct_symMX([entry(key, shape=self.p[key]) for key in self.p])
-        self.struct_lam_g = struct_symMX([entry(key, shape=self.g[key].shape) for key in self.g])
-        self.struct_lam_h = struct_symMX([entry(key, shape=self.h[key].shape) for key in self.h])
+        self.struct_lam_w = struct_symMX([entry(key, shape=self.decision_vars[key]) for key in self.decision_vars])
+        self.struct_lam_p = struct_symMX([entry(key, shape=self.params[key]) for key in self.params])
+        self.struct_lam_g = struct_symMX([entry(key, shape=self.eq_constraints[key].shape) for key in self.eq_constraints])
+        self.struct_lam_h = struct_symMX([entry(key, shape=self.ineq_constraints[key].shape) for key in self.ineq_constraints])
 
-
-        # Vectorize x and p
-        #self.w_int = vertcat(*[w.reshape((w.shape[0]*w.shape[1],1)) for w in self.w.values()])
-        #self.p_int = vertcat(*[p.reshape((p.shape[0]*p.shape[1],1)) for p in self.p.values()])
-
-        self.J_int = struct_MX([entry('J', expr=self.J)])
+        self.J_int = struct_MX([entry('J', expr=self.cost)])
 
         # Vectorize g and h, concatenate them
-        self.g_int = struct_MX([entry(key, expr=self.g[key]) for key in self.g.keys()])
-        self.h_int = struct_MX([entry(key, expr=self.h[key]) for key in self.h.keys()])
+        self.g_int = struct_MX([entry(key, expr=self.eq_constraints[key]) for key in self.eq_constraints.keys()])
+        self.h_int = struct_MX([entry(key, expr=self.ineq_constraints[key]) for key in self.ineq_constraints.keys()])
         self.c_int = vertcat(self.g_int.cat, self.h_int.cat)
-        #self.g_int = vertcat(*[g.reshape((g.shape[0]*g.shape[1],1)) for g in self.g.values()])
-        #self.h_int = vertcat(*[h.reshape((h.shape[0]*h.shape[1],1)) for h in self.h.values()])
-        #self.c_int = vertcat(self.g_int, self.h_int)
 
         # Create the nlp object
         self.nlp = {
-            'x': self.struct_w, #vertcat(*cas.symvar(self.w_int)),
-            'p': self.struct_p, #vertcat(*cas.symvar(self.p_int)),
-            'f': self.J,
+            'x': self.struct_w,
+            'p': self.struct_p,
+            'f': self.cost,
             'g': self.c_int,
         }
-
-        """
-        # Check if all decision variables were used in J,g or h
-        w = self.struct_w
-        used_check = dict([ 
-          (key+" "+str(idx),False) for key in w.keys() for idx in itertools.product(*[range(s) for s in w[key].shape])
-        ])
-    
-        for key in w.keys():
-          # Fetch decision variable vector
-          elem = vertcat(*cas.symvar(w[key]))
-          # Check all vector components
-          for idx in itertools.product(*[range(s) for s in elem.shape]):
-            if cas.depends_on(self.nlp['f'], *cas.symvar(elem[idx])):
-              used_check[key+" "+str(idx)] = True
-            print("Checking g..", key, idx)
-            if cas.depends_on(self.nlp['g'], *cas.symvar(elem[idx])):
-              used_check[key+" "+str(idx)] = True
-        
-        for key in used_check.keys():
-          if used_check[key] == False:
-            print("WARNING: In ParametricNLP \"", self.name, "\", element \"", key, "\" is unused.")
-        """
 
         if 'hess_lag' not in opts.keys():
             # Create lagrange hessian
@@ -217,35 +172,9 @@ class ParametricNLP:
             z = vertcat(w,lam_g) # Todo: needs lam_h also
             sigma = cas.MX.sym('sigma')
             # Create Lagrangian
-            lag = self.J
+            lag = self.cost
             if self.g_int.shape != (0,0):
                 lag += mtimes(lam_g.T, self.g_int)
-
-            """
-            f = self.nlp['f']
-            #g = self.nlp['g'][:self.ng]
-            g = self.nlp['g']
-            h = self.nlp['g'][self.ng:]
-            grad_f = jacobian(f,w).T
-            #grad_f = cas.gradient(f,w)
-            jac_g = jacobian(g,w)
-            hes_f = hessian(f,w)[0]
-            hes_g = [hessian(g[i],w)[0] for i in range(self.ng)]
-            
-            self.grad_f_fun = Function('grad_f', [w,p], [0,grad_f])
-            self.jac_g_fun = Function('grad_g', [w,p], [0,jac_g])
-            
-            self.hess_lag_fun = Function('hess_lag', [w,p,sigma,lam_g], [
-              sigma * hes_f + sum([ lam_g[i] * hes_g[i] for i in range(self.ng) ])
-            ]).expand()
-            
-            #print(self.grad_f_fun.n_out())
-        
-            ## Initialize solver
-            opts['grad_f'] = self.grad_f_fun
-            opts['jac_g'] = self.jac_g_fun
-            opts['hess_lag'] = self.hess_lag_fun
-            """
 
         # Create solver
         if is_qp:
@@ -260,8 +189,8 @@ class ParametricNLP:
 
         # Compile solver if desired
         if compile_solver:
-            opts['expand'] = False # Needed because we eval_sx bug when loading compiled .so
-            path = "" + self.name # Apparently no subdirectory allowed?
+            opts['expand'] = False  # Needed because we eval_sx bug when loading compiled .so
+            path = "" + self.name  # Apparently no subdirectory allowed?
             if not os.path.isfile(path + ".so"):
                 print("Compiling NLP \"" + self.name + "\". This may take a while.")
                 start_time = time.time()
@@ -281,13 +210,12 @@ class ParametricNLP:
                 print("Using already compiled solver \"" + path + "\".")
 
             self.solver = nlpsol(self.name, nlpsolver, os.path.abspath(path+'.so'), opts)
-            #self.solver = cas.external(self.name, os.path.abspath(path+'.so'))
 
         # Define lower & upper bounds
-        lbg = numpy.zeros((self.ng,1))
-        ubg = numpy.zeros((self.ng,1))
-        lbh = numpy.zeros((self.nh,1))
-        ubh = inf * numpy.ones((self.nh,1))
+        lbg = numpy.zeros((self.num_eq_constraints, 1))
+        ubg = numpy.zeros((self.num_eq_constraints, 1))
+        lbh = numpy.zeros((self.num_ineq_constraints, 1))
+        ubh = inf * numpy.ones((self.num_ineq_constraints, 1))
         self.lb = vertcat(lbg,lbh)
         self.ub = vertcat(ubg,ubh)
 
@@ -296,33 +224,21 @@ class ParametricNLP:
             w = self.struct_w
             p = self.struct_p
             lam_g = self.struct_lam_g.cat
-            z = vertcat(w,lam_g) # Todo: needs lam_h also
+            z = vertcat(w,lam_g)  # Todo: needs lam_h also
 
             # Create Lagrangian
-            lag = self.J
+            lag = self.cost
             if self.g_int.shape != (0,0):
                 lag += mtimes(lam_g.T, self.g_int)
 
             # Create functors
             self.f_fun = Function('f', [w,p], [self.nlp['f']])
-            self.g_fun = Function('g', [w,p], [self.nlp['g'][:self.ng]])
-            self.h_fun = Function('h', [w,p], [self.nlp['g'][self.ng:]])
+            self.g_fun = Function('g', [w,p], [self.nlp['g'][:self.num_eq_constraints]])
+            self.h_fun = Function('h', [w,p], [self.nlp['g'][self.num_eq_constraints:]])
             self.jac_g_fun = Function('jac_g', [w,p], [jacobian(self.g_fun(w,p),w)])
             self.lag_fun = Function('lag', [w,lam_g,p], [lag])
             self.jac_lag_fun = Function('jac_lag', [w,lam_g,p], [jacobian(lag,w)])
             self.hess_lag_fun = Function('hess_lag', [w,lam_g,p], [hessian(lag,w)[0]])
-            # NLP functors
-            """
-            self.kkt_fun = Function('kkt', [w,lam_g,p], [blockcat([
-              [self.hess_lag_fun(w,lam_g,p), self.jac_g_fun(w,p).T],
-              [self.jac_g_fun(w,p), DM.zeros((self.ng,self.ng))]
-            ])])
-            self.R_fun = Function('R', [w,lam_g,p], [blockcat([
-              [ self.f_fun(w,p) + mtimes(self.jac_g_fun(w,p).T, lam_g) ],
-              [ self.g_fun(w,p) ]
-            ])])
-            self.jac_R_fun = Function('jac_R', [w,lam_g,p], [jacobian(self.R_fun(w,lam_g,p),z)])
-            """
 
     def eval_g(self, w:DMStruct, p:DMStruct):
         assert isinstance(w,DMStruct), "w is type " + str(type(w))
@@ -355,191 +271,66 @@ class ParametricNLP:
         eigvecs_expanded = Z.full().dot(eigvecs)
         return [ (eigvals[k], self.struct_w(eigvecs_expanded[:,k])) for k in range(eigvecs_expanded.shape[1]) ]
 
-    def eval_kappa_exact(self, w:DMStruct, lam_g:DMStruct, p:DMStruct):
-        assert isinstance(w,DMStruct), "w is type " + str(type(w))
-        assert isinstance(lam_g,DMStruct), "lam_g is type " + str(type(lam_g))
-        assert isinstance(p,DMStruct), "p is type " + str(type(p))
-        M = self.kkt_fun(w,lam_g,p)
-        J = self.jac_R_fun(w,lam_g,p)
-        mat = DM.eye((M.rows())) - mtimes(cas.inv(M), J)
-        eigvals, eigvecs = scipy.linalg.eig(mat)
-        return max([abs(val) for val in eigvals])
 
 
-
-    def solve(self, winit: struct_symMX, param: struct_symMX = None):
-        """ Solves the Parametric NLP """
-
-        # Fetch parameters
-        self.current_params = param # needed?
-
-        # Optimize!
-        result = self.solver(
-            p = param,
-            x0 = winit,
-            lbg = self.lb,
-            ubg = self.ub
-        )
+    def solve(self, initial_guess: struct_symMX, params: struct_symMX = None):
+        """ Solves the Parametric NLP.
+        :param initial_guess:
+        :param params:
+        :returns:
+        """
+        self.current_params = param
+        result = self.solver(p=param, x0=initial_guess, lbg=self.lb, ubg=self.ub)
 
         # Extract solution and solver statistics
         stats = self.solver.stats()
-        f     = result['f']
-        w     = self.struct_w     (result['x'])
-        #lam_w = self.struct_lam_w (result['lam_x'])
-        p     = self.struct_p     (param)
-        #lam_p = self.struct_lam_p (result['lam_p'])
-        #g     = self.struct_g     (result['g'][:self.ng])
-        #lam_g = self.struct_lam_g (result['lam_g'][:self.ng])
-        #h     = self.struct_h     (result['g'][self.ng:]) if self.nh > 0 else self.struct_h(0)
-        #lam_h = self.struct_lam_h (result['lam_g'][self.ng:]) if self.nh > 0 else self.struct_h(0)
-
-        # Bundle solution and return
-        sol = {
-            'f': f,
-            'w': w, #'lam_w': lam_w,
-            'p': p, #'lam_p': lam_p,
-            #'g': g, 'lam_g': lam_g,
-            #'h': h, 'lam_h': lam_h
-        }
-
+        optimal_cost = result['f']
+        optimal_solution = self.struct_w(result['x'])
+        params = self.struct_p(param)
+        sol = {'f': optimal_cost, 'w': optimal_solution, 'p': params}
         return sol, stats, result, self.lb, self.ub
 
 
     def __str__(self):
-        """ toString-method.
-        Returns an info-string about the object
+        """toString-method.
+        :returns: An info-string about the object.
         """
 
         max_str_len = 120
         infostr =  "======================================\n"
         infostr += "== OPTIMIZATION PROBLEM INFO STRING ==\n"
         infostr += "\"" + self.name + "\" \n\n"
-        infostr += "Shooting variables: " + str(self.nw) + "\n"
-        for elem in self.w.items():
+        infostr += "Shooting variables: " + str(self.num_decision_vars) + "\n"
+        for elem in self.decision_vars.items():
             infostr += "  " + elem[0] + ": " + str(elem[1]) + "\n"
-        infostr += "Parameters: " + str(self.np) + "\n"
-        for elem in self.p.items():
+        infostr += "Parameters: " + str(self.num_params) + "\n"
+        for elem in self.params.items():
             infostr += "  " + elem[0] + ": " + str(elem[1]) + "\n"
         infostr += "Objective: \n"
-        if len(str(self.J)) > max_str_len:
-            infostr += str(self.J)[:max_str_len] + " ..."
+        if len(str(self.cost)) > max_str_len:
+            infostr += str(self.cost)[:max_str_len] + " ..."
         else:
-            infostr += str(self.J)
+            infostr += str(self.cost)
 
         infostr += "\n\nEquality constraints: \n"
-        for elem in self.g.items():
+        for elem in self.eq_constraints.items():
             infostr += elem[0] + ": " + str(elem[1].shape) + "\n"
 
         infostr += "\n\nInequality constraints: \n"
-        for elem in self.h.items():
+        for elem in self.ineq_constraints.items():
             infostr += elem[0] + ": " + str(elem[1].shape) + "\n"
 
         infostr += "======================================\n"
         return infostr
 
     def getf(self):
-        """ Returns the cost function """
-        # Functionize constraints and return
-        return Function('f', [self.struct_w,self.struct_p], [self.J], ['w','p'], ['J'])
+        """Returns the cost function
+        :returns: A functional to evaluate the cost function.
+        """
+        return Function('f', [self.struct_w, self.struct_p], [self.cost], ['w', 'p'], ['J'])
 
     def getG(self):
-        """ Returns the equality constraint function """
-        # Create symbolics
-        w = self.struct_w #cas.vertcat(*cas.symvar(self.w_int))
-        p = self.struct_p #cas.vertcat(*cas.symvar(self.p_int))
-
-        # Get equality constraints
-        g = self.g_int
-
-        # Functionize constraints and return
-        return Function('G', [w,p], [g], ['w','p'], ['G'])
-
-
-    def getKKT(self):
-        """ Returns the KKT matrix as a function object """
-        from casadi import jacobian, hessian, blockcat
-
-        # Create symbolics
-        w = self.struct_w #cas.vertcat(*cas.symvar(self.w_int))
-        p = self.struct_p #cas.vertcat(*cas.symvar(self.p_int))
-        g = self.getG()(w,p)
-        lam_g = MX.sym('lam_g', g.rows())
-
-        # Create Lagrangian
-        L = self.J
-        if g.shape != (0,0):
-            L += mtimes(lam_g.T, g)
-
-        # Derive g w.r.t. w
-        jg = MX.zeros(g.shape)
-        if g.shape != (0,0):
-            jg = jacobian(g,w)
-
-        # Derive L w.r.t. w
-        jg = self
-        hL = self.hess_lag_fun(w,p)
-
-        # Create KKT matrix
-        KKT = blockcat([
-            [hL, jg.T],
-            [jg, MX.zeros((jg.rows(),jg.rows()))]
-        ])
-
-        # TODO: Do a KKT.is_singular() check, print out warnings if so
-
-        # Functionize KKT matrix and return
-        return Function('KKT', [w,lam_g,p], [KKT], ['w','lam_g','p'], ['KKT'])
-
-
-    def evalG(self, w: numpy.array):
-        """ Evaluates the constraint function at a specific point.
-        Parameter: w (numpy.array): The decision variables
+        """Returns the equality constraint function.
+        :returns: A functional to evaluate the constraint function.
         """
-        return self.getG()(w, self.current_params)
-
-
-    def evalKKT(self, w, lam_g):
-        """ Evaluates the KKT matrix at a specific point.
-        Parameters:
-        w (numpy.array): The decision variable
-        lam_g (numpy.array): The constraint multipliers
-        """
-        return self.getKKT()(w, lam_g, self.current_params)
-
-
-    def spy(self, fignum, gridspacing = 1):
-        """ Returns the sparsity pattern plot of the hessian
-
-        Parameters:
-        fignum (int): The figure number
-        gridspacing (int): Repetition interval of the thick lines
-
-        Returns the figure handle
-        """
-        from utils.SparsityPlotter import SparsityPlotter
-        from casadi import sparsify
-
-        # Create symbolics
-        w = self.struct_w #cas.vertcat(*cas.symvar(self.w_int))
-        p = self.struct_p #cas.vertcat(*cas.symvar(self.p_int))
-        g = self.getG()(w,p)
-        lam_g = MX.sym('lam_g', g.rows())
-
-        # Evaluate KKT matrix symbolically
-        KKT = self.getKKT().expand()(w,lam_g,p)
-
-        # Sparsify the KKT matrix
-        KKT_sp = sparsify(KKT)
-        rows = KKT.rows()
-        cols = KKT.columns()
-
-        # Return the figure handle of the sparsity plot
-        plotter = SparsityPlotter(fignum, rows, cols, gridSpacing=gridspacing)
-        return plotter.printSparsity(KKT_sp)
-
-
-###########################################################################
-###                                                                     ###
-###                            END OF OP CLASS                          ###
-###                                                                     ###
-###########################################################################
+        return Function('G', [self.struct_w, self.struct_p], [self.g_int], ['w','p'], ['G'])

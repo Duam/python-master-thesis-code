@@ -211,7 +211,7 @@ covmat = ident.cov_fun(result['w'],result['p'])
 print("Covariance matrix: " + str(covmat))
 print("Diagonals: " + str(cs.diag(covmat)))
 
-identified_p_vars = cs.diag(covmat)[ident.ocp.nw-ident.NP:]
+identified_p_vars = cs.diag(covmat)[ident.ocp.num_decision_vars - ident.NP:]
 
 if False:
   print("\n\EIGENVALUE SHIT\n\n")
@@ -234,9 +234,9 @@ print("Identified parameters:")
 idx = 0
 identified_param = {}
 identified_param_vars = {}
-for k in range(len(model.dae.p)):
-    key = str(model.dae.p[k])
-    shape = model.dae.p[k].shape
+for k in range(len(model.dae.params)):
+    key = str(model.dae.params[k])
+    shape = model.dae.params[k].shape
     len = np.prod(shape)
     identified_param[key] = p_sol[idx:idx+len].reshape(shape).full().squeeze().tolist()
     identified_param_vars[key] = identified_p_vars[idx:idx+len].reshape(shape).full().squeeze().tolist()

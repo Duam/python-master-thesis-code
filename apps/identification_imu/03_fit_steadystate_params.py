@@ -264,9 +264,9 @@ identified_param_vars = {}
 identified_p_vars = cs.diag(p_covar)
 #identified_p_vars = cs.diag(p_covar)
 #identified_p_vars = cs.mtimes(R.T, R) * p_covar_diag
-for k in range(len(model.dae.p)):
-    key = str(model.dae.p[k])
-    shape = model.dae.p[k].shape
+for k in range(len(model.dae.params)):
+    key = str(model.dae.params[k])
+    shape = model.dae.params[k].shape
     len = np.prod(shape)
     identified_param[key] = identified_p[idx:idx+len].reshape(shape).full().squeeze().tolist()
     identified_param_vars[key] = identified_p_vars[idx:idx+len].reshape(shape).full().squeeze().tolist()

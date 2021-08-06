@@ -237,7 +237,7 @@ class CarouselIdentificator:
 
         # Compute covariance of solution
         jac_R = cas.jacobian(total_weighted_residual, w_ocp_sym)
-        jac_g = cas.jacobian(self.ocp.nlp['g'][:self.ocp.ng], w_ocp_sym)
+        jac_g = cas.jacobian(self.ocp.nlp['g'][:self.ocp.num_eq_constraints], w_ocp_sym)
         print(jac_R.shape)
         print(jac_g.shape)
         print(w_ocp_sym.shape)
