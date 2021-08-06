@@ -1,3 +1,0 @@
-[submodule "extern/zerocm"]
-	path = extern/zerocm
-	url = git@github.com:ZeroCM/zcm.git
