@@ -9,9 +9,9 @@ from thesis_code.zcm_message_definitions.timestamped_vector_double import timest
 from thesis_code.utils.zcm_constants import carousel_zcm_constants as carzcm
 import thesis_code.utils.signals as signals
 from thesis_code.model import CarouselModel
-from thesis_code.carousel_mhe import Carousel_MHE
-from thesis_code.carousel_mpc import Carousel_MPC
-from thesis_code.carousel_tarsel import Carousel_TargetSelector
+from thesis_code.mhe import Carousel_MHE
+from thesis_code.mpc import Carousel_MPC
+from thesis_code.target_selector import Carousel_TargetSelector
 
 # Set OMP number of threads
 os.environ["OMP_NUM_THREADS"] = str(multiprocessing.cpu_count())

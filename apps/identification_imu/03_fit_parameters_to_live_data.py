@@ -1,5 +1,5 @@
 from thesis_code.model import CarouselModel
-from thesis_code.carousel_ident import CarouselIdentificator
+from thesis_code.identificator import CarouselIdentificator
 import json
 from copy import deepcopy
 from thesis_code.utils.bcolors import bcolors

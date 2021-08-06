@@ -2,10 +2,10 @@ import numpy as np
 import casadi as cas
 from thesis_code.model import CarouselModel
 import matplotlib.pyplot as plt
-import thesis_code.carousel_visualizer as viz
-from thesis_code.carousel_mhe import Carousel_MHE
-from thesis_code.carousel_mpc import Carousel_MPC
-from thesis_code.carousel_tarsel import Carousel_TargetSelector
+import thesis_code.visualizer as viz
+from thesis_code.mhe import Carousel_MHE
+from thesis_code.mpc import Carousel_MPC
+from thesis_code.target_selector import Carousel_TargetSelector
 from thesis_code.simulator import CarouselSimulator
 from thesis_code.utils.bcolors import bcolors
 
